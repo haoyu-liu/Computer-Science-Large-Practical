@@ -34,21 +34,23 @@ class DownloadTask(val progressbar: ProgressBar): AsyncTask<Int, Double, Int>() 
         progressbar.setProgress(0)
         val root = Environment.getExternalStorageDirectory().absolutePath + "/songlist"
         val songdir = File(root)
-        if(songdir.exists()){
+/*        if(songdir.exists()){
             val a = songdir.list()
             current = a.size
 
-        }
+        }*/
     }
 
     override fun doInBackground(vararg params: Int?): Int {
         val songlisturl = url + "songs.xml"
         val doc = Jsoup.connect(songlisturl).get()
 
+
         val songs = doc.select("Song > Number")
         newest = songs.last().html().toInt()
 
-        if (current < songs.last().html().toInt()) {
+        if (current <= songs.last().html().toInt()) {
+
             newest = songs.last().html().toInt()
             try {
                 val songdir = File(root.absolutePath + "/songlist")
@@ -56,11 +58,12 @@ class DownloadTask(val progressbar: ProgressBar): AsyncTask<Int, Double, Int>() 
                     Log.d("Datascrap", "not exist")
                     songdir.mkdir()
                 }
+                //FileUtils.copyURLToFile(URL(songlisturl), File(songdir.absolutePath+"/songs.xml"))
 
                 for (i in current+1..newest) {
-                        val mapurl = url + formatNum(i) + "/" + "map1.kml"
+                        val mapurl = url + formatNum(i) + "/" + "map5.kml"
                         val lyricsurl = url + formatNum(i) + "/" + "words.txt"
-                        FileUtils.copyURLToFile(URL(mapurl), File(songdir.absolutePath, formatNum(i) + "/" + "map1.kml"))
+                        FileUtils.copyURLToFile(URL(mapurl), File(songdir.absolutePath, formatNum(i) + "/" + "map5.kml"))
                         FileUtils.copyURLToFile(URL(lyricsurl), File(songdir.absolutePath, formatNum(i) + "/" + "words.txt"))
                         publishProgress(i/(newest-current-1).toDouble())
 
@@ -71,6 +74,7 @@ class DownloadTask(val progressbar: ProgressBar): AsyncTask<Int, Double, Int>() 
         }
         return 1
     }
+
 
     override fun onProgressUpdate(vararg values: Double?) {
         val progress = (values[0]!!*100).toInt()

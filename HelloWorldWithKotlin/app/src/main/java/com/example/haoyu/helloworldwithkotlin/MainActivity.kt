@@ -23,31 +23,31 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        requestPermission()
+//        requestPermission()
 /*        while(!checkPermission()){
             Thread.sleep(1000)
         }*/
-        Log.d("Mainactivity", "requested")
-        val progressbar = findViewById(R.id.progressBar1) as ProgressBar
-        Thread.sleep(1000)
-        if(isExternalStorageWritable()) {
-            try {
+//        Log.d("Mainactivity", "requested")
+//        val progressbar = findViewById(R.id.progressBar1) as ProgressBar
+//        Thread.sleep(1000)
+//        if(isExternalStorageWritable()) {
+//            try {
+//
+//                progressbar.max = 100
+//                DownloadTask(progressbar).execute(100)
+//            } catch (e: IOException) {
+//                Toast.makeText(this, "download failed", Toast.LENGTH_SHORT).show()
+//            }
+//
+//        }else
+//            Toast.makeText(this, "unreadable", Toast.LENGTH_SHORT).show()
 
-                progressbar.max = 100
-                DownloadTask(progressbar).execute(100)
-            } catch (e: IOException) {
-                Toast.makeText(this, "download failed", Toast.LENGTH_SHORT).show()
-            }
-
-        }else
-            Toast.makeText(this, "unreadable", Toast.LENGTH_SHORT).show()
-
-        val button = findViewById(R.id.button1) as Button
-        button.setOnClickListener {
-                val intent = Intent(this, MapsActivity::class.java)
-                startActivity(intent)
-
-            }
+//        val button = findViewById(R.id.button1) as Button
+//        button.setOnClickListener {
+//                val intent = Intent(this, MapsActivity::class.java)
+//                startActivity(intent)
+//
+//            }
     }
 
 
