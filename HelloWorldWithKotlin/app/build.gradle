@@ -40,6 +40,8 @@ dependencies {
     compile 'com.premnirmal.magnet:library:1.2.4'
     compile 'com.facebook.rebound:rebound:0.3.8'
     compile 'com.tumblr:backboard:0.1.2'
+    compile 'com.ogaclejapan.smarttablayout:library:1.6.1@aar'
+    compile 'com.ogaclejapan.smarttablayout:utils-v4:1.6.1@aar'
     testCompile 'junit:junit:4.12'
 
 }

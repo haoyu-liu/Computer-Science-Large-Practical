@@ -24,5 +24,16 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="PrimaryFlatButton1" parent="Theme.AppCompat.Light">
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Borderless.Colored</item>
+        <item name="colorControlHighlight">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
+    </style>
+    <style name="PrimaryFlatButton2" parent="Theme.AppCompat.Light">
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Borderless.Colored</item>
+        <item name="colorControlHighlight">@color/white</item>
+        <item name="colorAccent">@color/primary</item>
+    </style>
+
 
 </resources>

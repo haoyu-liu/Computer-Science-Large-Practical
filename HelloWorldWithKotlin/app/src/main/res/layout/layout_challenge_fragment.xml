@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content2"
+    android:layout_width="match_parent"
+    android:layout_height="170dp"
+    android:background="@color/lime">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="170dp">
+
+        <TextView
+            android:id="@+id/text_challenge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="casual"
+            android:paddingTop="10dp"
+            android:text="Challenge Mode"
+            android:textColor="@color/white"
+            android:textSize="25sp" />
+        <Spinner
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:id="@+id/challenge_spinner"
+            android:padding="20dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginLeft="81dp"
+            android:layout_below="@+id/text_challenge"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="81dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start"
+            android:textColor="@color/white"
+            android:fontFamily="casual"
+            android:theme="@style/PrimaryFlatButton1"
+            android:layout_toRightOf="@+id/challenge_spinner"
+            android:layout_alignBottom="@+id/challenge_spinner"
+            android:layout_alignTop="@+id/challenge_spinner"/>
+
+    </RelativeLayout>
+</ScrollView>

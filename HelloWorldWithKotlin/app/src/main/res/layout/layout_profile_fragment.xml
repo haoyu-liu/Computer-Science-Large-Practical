@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="170dp"
+    android:background="@color/primary">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="170dp">
+
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@mipmap/koyomi_circle"
+            android:layout_marginTop="50dp"
+            android:layout_marginLeft="25dp"
+            android:id="@+id/profile_image"
+            />
+
+        <TextView
+            android:id="@+id/profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/profile_image"
+            android:layout_marginBottom="10dp"
+            android:layout_toEndOf="@+id/profile_image"
+            android:layout_toRightOf="@+id/profile_image"
+            android:fontFamily="casual"
+            android:paddingLeft="15dp"
+            android:paddingTop="8dp"
+            android:text="Haoyu Liu"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/profile_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/profile_image"
+            android:layout_alignLeft="@+id/profile_name"
+            android:layout_toRightOf="@+id/profile_image"
+            android:fontFamily="casual"
+            android:paddingBottom="5dp"
+            android:paddingLeft="15dp"
+            android:text="s1783038@sms.ed.ac.uk"
+            android:textColor="@color/white" />
+    </RelativeLayout>
+</ScrollView>

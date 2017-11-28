@@ -3,22 +3,31 @@ package com.example.haoyu.helloworldwithkotlin
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.Snackbar
-import android.view.View
 import android.support.design.widget.NavigationView
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
+import android.support.v4.view.PagerAdapter
+import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ProgressBar
-import android.widget.Toast
-import java.io.IOException
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import com.ogaclejapan.smarttablayout.SmartTabLayout
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter
+import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems
 
-class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
+
+    private final val NUM_PAGES = 3
+    private var mPager:ViewPager?=null
+    private var mPagerApdater:PagerAdapter?= null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +35,27 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val toolbar = findViewById(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
 
-        val fab = findViewById(R.id.fab) as FloatingActionButton
+        mPager = findViewById(R.id.pager) as ViewPager
+        val adapter = FragmentPagerItemAdapter(
+            supportFragmentManager, FragmentPagerItems.with(this)
+                .add("casual", CasualFragment::class.java)
+                .add("profile", ProfileFragment::class.java)
+                .add("challenge", ChallengeFragment::class.java)
+                .create())
+        mPager!!.adapter = adapter
+        val viewPagerTab = findViewById(R.id.viewpagertab) as SmartTabLayout
+        viewPagerTab.setViewPager(mPager)
+        mPager!!.currentItem=1
+
+
+
+/*        mPagerApdater = SlidePagerAdapter(supportFragmentManager)
+        mPager!!.adapter=mPagerApdater
+        val viewPagerTab = findViewById(R.id.viewpagertab) as SmartTabLayout
+        viewPagerTab.setViewPager(mPager)*/
+
+        //Progress Bar implementation
+/*        val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { view ->
             val progressbar = findViewById(R.id.progressBar1) as ProgressBar
             if(isExternalStorageWritable()) {
@@ -43,7 +72,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
 
-        }
+        }*/
 
         val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
         val toggle = ActionBarDrawerToggle(
@@ -63,9 +92,11 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START)
-        } else {
+        } else if(mPager!!.currentItem!=0)
+            mPager!!.setCurrentItem(mPager!!.currentItem-1) else{
             super.onBackPressed()
         }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -121,4 +152,15 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     fun isExternalStrorageReadable():Boolean =
             Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())||
                     Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())
+
+    inner class SlidePagerAdapter(fm: FragmentManager): FragmentStatePagerAdapter(fm){
+
+        override fun getItem(position: Int): Fragment {
+            return ProfileFragment()
+        }
+
+        override fun getCount(): Int {
+            return NUM_PAGES
+        }
+    }
 }
