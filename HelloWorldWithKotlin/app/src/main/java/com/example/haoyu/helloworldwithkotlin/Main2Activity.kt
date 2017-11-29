@@ -13,26 +13,26 @@ import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ArrayAdapter
-import android.widget.Spinner
 import com.ogaclejapan.smarttablayout.SmartTabLayout
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems
+import org.jetbrains.anko.find
 
 class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
 
-    private final val NUM_PAGES = 3
     private var mPager:ViewPager?=null
-    private var mPagerApdater:PagerAdapter?= null
+    private var timelineitemlist = ArrayList<TimelineItem>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = find<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         mPager = findViewById(R.id.pager) as ViewPager
@@ -46,7 +46,12 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val viewPagerTab = findViewById(R.id.viewpagertab) as SmartTabLayout
         viewPagerTab.setViewPager(mPager)
         mPager!!.currentItem=1
-
+        initTimelineItems()
+        val recyclerview = find<RecyclerView>(R.id.recycler_view_timeline)
+        val layoutmanager = LinearLayoutManager(this)
+        recyclerview.layoutManager=layoutmanager
+        val timeline_adapter = TimelineAdapter(timelineitemlist)
+        recyclerview.adapter = timeline_adapter
 
 
 /*        mPagerApdater = SlidePagerAdapter(supportFragmentManager)
@@ -153,14 +158,13 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())||
                     Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())
 
-    inner class SlidePagerAdapter(fm: FragmentManager): FragmentStatePagerAdapter(fm){
-
-        override fun getItem(position: Int): Fragment {
-            return ProfileFragment()
-        }
-
-        override fun getCount(): Int {
-            return NUM_PAGES
-        }
+    private fun initTimelineItems(){
+        timelineitemlist.add(TimelineItem("2015-01", "1","love you forever"))
+        timelineitemlist.add(TimelineItem("2015-01", "0","dismiss"))
+        timelineitemlist.add(TimelineItem("2015-02", "0","love you forever"))
+        timelineitemlist.add(TimelineItem("2015-01", "1","Interesting"))
+        timelineitemlist.add(TimelineItem("2015-01", "1","what's wrong"))
+        timelineitemlist.add(TimelineItem("2015-01", "0","who are you"))
+        timelineitemlist.add(TimelineItem("2015-01", "1","Jillian"))
     }
 }
