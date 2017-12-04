@@ -18,6 +18,7 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.ogaclejapan.smarttablayout.SmartTabLayout
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems
@@ -54,10 +55,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         recyclerview.adapter = timeline_adapter
 
 
-/*        mPagerApdater = SlidePagerAdapter(supportFragmentManager)
-        mPager!!.adapter=mPagerApdater
-        val viewPagerTab = findViewById(R.id.viewpagertab) as SmartTabLayout
-        viewPagerTab.setViewPager(mPager)*/
+
 
         //Progress Bar implementation
 /*        val fab = findViewById(R.id.fab) as FloatingActionButton
@@ -92,6 +90,9 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
     }
+
+
+
 
     override fun onBackPressed() {
         val drawer = findViewById(R.id.drawer_layout) as DrawerLayout

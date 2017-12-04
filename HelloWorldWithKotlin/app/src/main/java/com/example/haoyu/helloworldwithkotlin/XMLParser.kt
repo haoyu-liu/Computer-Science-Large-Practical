@@ -8,6 +8,11 @@ import java.io.File
 /**
  * Created by HAOYU on 2017/11/1.
  */
+
+data class Song(val Number: String, val Artist: String, val Title: String, val Link: String)
+data class marker(val name: String, val longitude: String, val latitude: String, val style: String)
+
+
 class SongParser(val song: Int, val version: Int){
 
 
@@ -50,6 +55,7 @@ class SongParser(val song: Int, val version: Int){
         return markerList
 
     }
+
     fun loadSongList() : MutableList<Song>{
         val xml = Jsoup.connect("http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/songs.xml").get()
         val Songs = xml.select("Song")
@@ -65,5 +71,3 @@ class SongParser(val song: Int, val version: Int){
     }
 }
 
-data class Song(val Number: String, val Artist: String, val Title: String, val Link: String)
-data class marker(val name: String, val longitude: String, val latitude: String, val style: String)

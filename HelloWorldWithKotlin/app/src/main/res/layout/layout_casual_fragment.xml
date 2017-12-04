@@ -19,8 +19,8 @@
             android:textColor="@color/white"
             android:textSize="25sp" />
         <Spinner
-            android:layout_width="100dp"
-            android:layout_height="40dp"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
             android:id="@+id/casual_spinner"
             android:padding="20dp"
             android:layout_marginTop="40dp"
@@ -28,13 +28,16 @@
             android:layout_below="@+id/text_casual"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="81dp" />
+            android:layout_marginStart="81dp"
+            android:spinnerMode="dropdown"/>
 
         <Button
+            android:id="@+id/start_casl_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Start"
             android:textColor="@color/white"
+            android:fontFamily="casual"
             android:theme="@style/PrimaryFlatButton2"
             android:layout_toRightOf="@+id/casual_spinner"
             android:layout_alignBottom="@+id/casual_spinner"

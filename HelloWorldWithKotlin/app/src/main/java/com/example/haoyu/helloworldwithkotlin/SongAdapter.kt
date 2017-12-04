@@ -13,26 +13,7 @@ import org.jetbrains.anko.layoutInflater
 /**
  * Created by HAOYU on 2017/11/6.
  */
-/*class SongAdapter(context: Context, textViewResourceId: Int, objects: List<Song>):
-        ArrayAdapter<Song>(context, textViewResourceId, objects){
 
-    private val resourceId = textViewResourceId
-    private val mInflator: LayoutInflater
-
-    init{
-        this.mInflator = LayoutInflater.from(context)
-    }
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val song = getItem(position)
-        val view = this.mInflator.inflate(resourceId, parent, false)
-        val title = view.findViewById(R.id.title) as TextView
-        val artist = view.findViewById(R.id.artist) as TextView
-        title.setText(song.Title)
-        artist.setText(song.Word)
-        return view
-
-    }
-}*/
 
 class SongAdapter(val msonglist: List<Song>) : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 

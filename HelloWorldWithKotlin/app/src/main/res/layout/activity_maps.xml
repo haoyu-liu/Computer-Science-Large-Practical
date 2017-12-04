@@ -62,14 +62,16 @@
             android:background="@color/primary"
             android:theme="@style/AppTheme">
             <TextView
-                android:id="@+id/coutdown_text"
+                android:id="@+id/countdown_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Map"
+                android:text="Press to start"
+                android:fontFamily="casual"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:clickable="true"/>
 
         </android.support.v7.widget.Toolbar>
 
