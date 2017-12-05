@@ -1,7 +1,6 @@
 package com.example.haoyu.helloworldwithkotlin
 
 import android.os.Environment
-import android.util.Log
 import org.jsoup.Jsoup
 import java.io.File
 
@@ -13,20 +12,30 @@ data class Song(val Number: String, val Artist: String, val Title: String, val L
 data class marker(val name: String, val longitude: String, val latitude: String, val style: String)
 
 
-class SongParser(val song: Int, val version: Int){
+class SongParser(val index: Int, val version: Int){
 
 
-    private var songkml = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/"+formatNum(song)+"/map"+version.toString()+".kml")
+    private var songkml = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/"+formatNum(index)+"/map"+version.toString()+".kml")
     private var songtxt = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/01/words.txt")
     private var songlistxml = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/songs.xml")
-    val description = hashMapOf<String, String>()
+    private val description = hashMapOf<String, String>()
     private val markerList= mutableListOf<marker>()
     val lyricsmap = hashMapOf<String, String>()
-    private val songlist = mutableListOf<Song>()
+    val songlist = mutableListOf<Song>()
+    var song:Song?=null
 
     fun formatNum(i: Int) :String = if (i<10)
         "0"+i.toString()
     else i.toString()
+
+    init{
+        val thread = Thread{
+            loadSongList()
+        }
+        thread.start()
+        thread.join()
+        song = songlist[index -1]
+    }
 
     fun loadMarkerList() : MutableList<marker>{
         //kml

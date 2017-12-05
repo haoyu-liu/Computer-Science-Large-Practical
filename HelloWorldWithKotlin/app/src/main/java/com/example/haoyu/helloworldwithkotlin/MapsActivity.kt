@@ -1,11 +1,13 @@
 package com.example.haoyu.helloworldwithkotlin
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.support.v4.app.FragmentActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Environment
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -25,6 +27,8 @@ import com.premnirmal.Magnet.IconCallback
 import com.premnirmal.Magnet.Magnet
 import org.jetbrains.anko.find
 import org.jetbrains.anko.toast
+import java.io.File
+import java.text.DateFormat
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -33,7 +37,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
-        GoogleMap.OnMarkerClickListener, IconCallback{
+        GoogleMap.OnMarkerClickListener, IconCallback, View.OnClickListener{
 
 
 
@@ -45,6 +49,10 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     private var songParser: SongParser? =null
     private var lyricHashMap : HashMap<String, String>?=null
     private var magnet:Magnet?=null
+    private var song:Song?=null
+    private var user :String?=null
+    private var usrdirpath: String?=null
+    private var sfileManager :SFileManager?=null
     private val markersHashMap = hashMapOf<Marker, marker>()
     private val markersObj = mutableListOf<Marker>()
     private val obtained_interestingword = mutableListOf<Word>()
@@ -52,6 +60,9 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     private val obtained_boringword = mutableListOf<Word>()
     private val obtained_notboringword = mutableListOf<Word>()
     private val obtained_unclassifiedword = mutableListOf<Word>()
+    private var state = 0
+
+
 
 
 
@@ -72,8 +83,8 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         val iconview = ImageView(this)
         iconview.setImageResource(R.mipmap.koyomi_circle)
         magnet = Magnet.newBuilder(this).setIconView(iconview)
-                .setIconWidth(250)
-                .setIconHeight(250)
+                .setIconWidth(220)
+                .setIconHeight(220)
                 .setIconCallback(this)
                 .setHideFactor(0.2f)
                 .setShouldShowRemoveView(true)
@@ -89,19 +100,29 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         countdowntTextView = find(R.id.countdown_text)
         recyclerview = find(R.id.bottom_sheet_recyclerview)
         val linearlayoutManager = LinearLayoutManager(this)
-
+        val btn = find<Button>(R.id.confirm_button)
+        btn.setOnClickListener(this)
 
         //values from previous activity
         val intent = intent
         val mode = intent.getStringExtra("mode")
         val degree = intent.getStringExtra("degree")
 
+        //init SFileManager
+        val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
+        user = pref.getString("username", "admin")
+        usrdirpath = File(Environment.getExternalStorageDirectory().absolutePath, user).absolutePath
+        sfileManager = SFileManager(user!!)
 
         //init SongParser
+        val randNum = (1..18).random()
         if(degree == "Hard")
-            songParser = SongParser((1..18).random(), 4)
+            songParser = SongParser(randNum, 4)
         else
-            songParser = SongParser((1..18).random(), 5)
+            songParser = SongParser(randNum, 5)
+
+        song = songParser!!.song
+        Log.d("songname>>>>>>>", "${song!!.Title}")
         lyricHashMap = songParser!!.lyricsmap
 
 
@@ -109,6 +130,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         countdowntTextView!!.setOnClickListener {
             if(count==0) {
                 count++
+                state = 1
                 val markersInMapList = markerGenerator(songParser!!.loadMarkerList(), degree)
                 markersInMapList.forEach { v ->
                     val markerObj = mMap!!.addMarker(MarkerOptions()
@@ -144,46 +166,10 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
                     countdowntTextView!!.text = "drag up to review gained markers"
             }
         }
-
-
-
     }
 
 
-
-
-
-    override fun onMarkerClick(p0: Marker?): Boolean {
-
-        val markerLocation = Location("marker")
-        markerLocation.latitude = p0!!.position.latitude
-        markerLocation.longitude = p0!!.position.longitude
-        val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        if(permissionCheck == PackageManager.PERMISSION_GRANTED)
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient)
-        val distance = markerLocation.distanceTo(mLastLocation)
-        if(distance<5){
-            val word = lyricHashMap!![markersHashMap[p0]!!.name]
-            val style = markersHashMap[p0]!!.style
-            when(style){
-                "boring" -> obtained_boringword.add(Word(word!!))
-                "notboring" ->obtained_notboringword.add(Word(word!!))
-                "interesting"->obtained_interestingword.add(Word(word!!))
-                "veryinteresting" ->obtained_interestingword.add(Word(word!!))
-                else -> obtained_unclassifiedword.add(Word(word!!))
-            }
-            val adapter = TypeAdapter(constructData())
-            recyclerview!!.adapter=adapter
-            toast("obtained word: $word")
-            p0.remove()
-        }
-        else{
-            toast("get closer!!")
-        }
-        return true
-    }
-
-    fun markerGenerator(allmarkerList : MutableList<marker>, degree: String):MutableList<marker>{
+    private fun markerGenerator(allmarkerList : MutableList<marker>, degree: String):MutableList<marker>{
 
         val markersInMapList = mutableListOf<marker>()
 
@@ -212,30 +198,10 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     }
 
 
-    fun ClosedRange<Int>.random()=
-            Random().nextInt(endInclusive-start)+start
-
-
-    override fun onFlingAway() {
-
-    }
-
-    override fun onMove(p0: Float, p1: Float) {
-
-    }
-
-    override fun onIconDestroyed() {
-        finish()
-    }
-
-    override fun onIconClick(p0: View?, p1: Float, p2: Float) {
-
-    }
-
     private fun startTimer(duration: Long, interval: Long){
         val countdowntimer = object: CountDownTimer(duration, interval){
             override fun onFinish() {
-
+                onBackPressed()
             }
 
             override fun onTick(millisUntilFinished: Long) {
@@ -249,12 +215,96 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         countdowntimer.start()
     }
 
+    override fun onClick(v: View?) {
+        when(v!!.id){
+            R.id.confirm_button ->{
+                val edittext = find<EditText>(R.id.answer_edittext)
+                if(edittext.text.toString() == song!!.Title){
+                    onSuccess()
+                    finish()
+                }
+            }
+        }
+    }
+
+    override fun onMarkerClick(p0: Marker?): Boolean {
+
+        val markerLocation = Location("marker")
+        markerLocation.latitude = p0!!.position.latitude
+        markerLocation.longitude = p0!!.position.longitude
+        val distance = markerLocation.distanceTo(mLastLocation)
+        if(distance<15){
+            val word = lyricHashMap!![markersHashMap[p0]!!.name]
+            val style = markersHashMap[p0]!!.style
+            Log.d("collect marker", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>$word")
+            when(style){
+                "boring" -> obtained_boringword.add(Word(word!!))
+                "notboring" -> obtained_notboringword.add(Word(word!!))
+                "interesting"-> obtained_interestingword.add(Word(word!!))
+                "veryinteresting" -> obtained_veryinterestingword.add(Word(word!!))
+                else -> obtained_unclassifiedword.add(Word(word!!))
+            }
+            val adapter = TypeAdapter(constructData())
+            recyclerview!!.adapter=adapter
+            toast("obtained word: $word")
+            p0.remove()
+        }
+        else{
+            toast("get closer!!")
+        }
+        return true
+    }
+
+    private fun onFail(){
+        val time = DateFormat.getDateTimeInstance().format(Date())
+        val result = "0"
+        val song = this.song!!.Title
+        sfileManager!!.updateTI(TimelineItem(time, result, song))
+        magnet!!.destroy()
+
+    }
+
+    private fun onSuccess(){
+        val time = DateFormat.getDateTimeInstance().format(Date())
+        val result = "1"
+        val song = this.song!!.Title
+        sfileManager!!.updateTI(TimelineItem(time, result, song))
+        sfileManager!!.updateUSL(this.song!!)
+        magnet!!.destroy()
+
+    }
+
+
+
+    //magnet override functions
+    override fun onFlingAway() {
+        onFail()
+    }
+
+    override fun onMove(p0: Float, p1: Float) {
+
+    }
+
+    override fun onIconDestroyed() {
+        this.finish()
+    }
+
+    override fun onIconClick(p0: View?, p1: Float, p2: Float) {
+
+    }
+
+    override fun onBackPressed() {
+        if(state == 1)
+            onFail()
+        super.onBackPressed()
+
+    }
+
+
     override fun onStart() {
         mGoogleApiClient!!.connect()
         super.onStart()
     }
-
-
 
     override fun onStop() {
         mGoogleApiClient!!.disconnect()
@@ -262,10 +312,9 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     }
 
 
+    //mMap
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-
 
         try {
 
@@ -275,13 +324,10 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         }
         mMap!!.setPadding(0, 10, 0, 0)
         mMap!!.uiSettings.isMyLocationButtonEnabled = true
-
+        mMap!!.uiSettings.isCompassEnabled = true
     }
 
-    fun constructData(): List<Type> =
-        Arrays.asList(Type("boring", obtained_boringword), Type("notboring", obtained_notboringword),
-                Type("interesting", obtained_interestingword), Type("veryinteresting", obtained_veryinterestingword),
-                Type("unclassified", obtained_unclassifiedword))
+
 
 
     private fun enableMyLocation()=
@@ -301,6 +347,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this)
     }
 
+    //connection-related override functions
     override fun onConnected(p0: Bundle?) {
         try{ createLocationRequest()}
         catch (ise: IllegalStateException){
@@ -315,7 +362,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         if(p0 == null){
             Log.d("mapactivity", "[onLocationChanged] Location unknown")
         }else{
-            //do something
+            mLastLocation=p0
         }
     }
 
@@ -327,8 +374,13 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         Log.d("mapactivity", ">>>onConnectedFailed")
     }
 
+    fun ClosedRange<Int>.random()=
+            Random().nextInt(endInclusive-start)+start
 
-
+    fun constructData(): List<Type> =
+            Arrays.asList(Type("boring", obtained_boringword), Type("notboring", obtained_notboringword),
+                    Type("interesting", obtained_interestingword), Type("veryinteresting", obtained_veryinterestingword),
+                    Type("unclassified", obtained_unclassifiedword))
 }
 
 

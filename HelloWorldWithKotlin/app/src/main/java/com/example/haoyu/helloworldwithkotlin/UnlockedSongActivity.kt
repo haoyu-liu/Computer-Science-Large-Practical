@@ -1,5 +1,6 @@
 package com.example.haoyu.helloworldwithkotlin
 
+import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -25,7 +26,10 @@ class UnlockedSongActivity : AppCompatActivity() {
         mytoolbar.setOnClickListener{
             finish()
         }
-        initSong()
+        //initSong()
+        val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
+        val user = pref.getString("username", "admin")
+        songlist = SFileManager(user).getUSL()
 
         val recyclerview = findViewById(R.id.recycler_view) as RecyclerView
         val layoutManager = LinearLayoutManager(this)
@@ -56,21 +60,9 @@ class UnlockedSongActivity : AppCompatActivity() {
                 return true
             }
         })
-
-
-
-
-
-
     }
 
-    private fun initSong() {
-        val thread = Thread({
-            songlist = SongParser(1, 1).loadSongList()
-        })
-        thread.start()
-        thread.join()
-    }
+
 
 /*    override fun onCreateOptionsMenu(menu: Menu): Boolean{
         menuInflater.inflate(R.menu.unlock_toolbar ,menu)

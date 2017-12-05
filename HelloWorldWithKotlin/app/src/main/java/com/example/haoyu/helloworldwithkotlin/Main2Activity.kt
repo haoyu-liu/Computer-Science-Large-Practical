@@ -1,6 +1,8 @@
 package com.example.haoyu.helloworldwithkotlin
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Environment
 import android.support.design.widget.NavigationView
@@ -28,13 +30,23 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     private var mPager:ViewPager?=null
     private var timelineitemlist = ArrayList<TimelineItem>()
-
+    private var recyclerview : RecyclerView?=null
+    private var user :String?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
         val toolbar = find<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+
+        val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
+        if(!pref.contains("username")){
+            val editor = pref.edit()
+            editor.putString("username", "admin")
+            editor.apply()
+        }
+        user = pref.getString("username", "admin")
+        timelineitemlist = SFileManager(user!!).getTI()
 
         mPager = findViewById(R.id.pager) as ViewPager
         val adapter = FragmentPagerItemAdapter(
@@ -47,12 +59,12 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val viewPagerTab = findViewById(R.id.viewpagertab) as SmartTabLayout
         viewPagerTab.setViewPager(mPager)
         mPager!!.currentItem=1
-        initTimelineItems()
-        val recyclerview = find<RecyclerView>(R.id.recycler_view_timeline)
+        //initTimelineItems()
+        recyclerview = find(R.id.recycler_view_timeline)
         val layoutmanager = LinearLayoutManager(this)
-        recyclerview.layoutManager=layoutmanager
+        recyclerview!!.layoutManager=layoutmanager
         val timeline_adapter = TimelineAdapter(timelineitemlist)
-        recyclerview.adapter = timeline_adapter
+        recyclerview!!.adapter = timeline_adapter
 
 
 
@@ -86,22 +98,24 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val navigationView = findViewById(R.id.nav_view) as NavigationView
         navigationView.setNavigationItemSelectedListener(this)
 
-
-
-
     }
 
-
+    override fun onResume() {
+        timelineitemlist = SFileManager(user!!).getTI()
+        val timeline_adapter = TimelineAdapter(timelineitemlist)
+        recyclerview!!.adapter = timeline_adapter
+        super.onResume()
+    }
 
 
     override fun onBackPressed() {
         val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START)
-        } else if(mPager!!.currentItem!=0)
-            mPager!!.setCurrentItem(mPager!!.currentItem-1) else{
+        else if(mPager!!.currentItem!=0)
+            mPager!!.setCurrentItem(mPager!!.currentItem-1)
+        else
             super.onBackPressed()
-        }
 
     }
 

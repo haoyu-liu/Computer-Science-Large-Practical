@@ -32,18 +32,6 @@
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="8dp" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/start_finsh_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="top|left"
-        android:layout_marginBottom="15dp"
-        android:src="@android:drawable/ic_menu_mylocation"
-        app:elevation="8dp"
-        app:layout_anchor="@+id/map"
-        app:layout_anchorGravity="bottom|right" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -94,6 +82,7 @@
         android:layout_marginTop="100dp"
         >
         <EditText
+            android:id="@+id/answer_edittext"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:maxLines="1"
