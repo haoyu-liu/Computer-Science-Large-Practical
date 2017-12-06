@@ -3,6 +3,8 @@
     xmlns:tool="http://schemas.android.com/tools"
     package="com.example.haoyu.helloworldwithkotlin">
 
+    <uses-sdk tool:overrideLibrary="com.thoughtbot.expandablerecyclerview" />
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -13,8 +15,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-sdk tool:overrideLibrary="com.thoughtbot.expandablerecyclerview"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -26,7 +27,7 @@
         <activity
             android:name=".MainActivity"
             android:label="ori"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -42,7 +43,7 @@
 
         <activity
             android:name=".MapsActivity"
-             android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Main2Activity"
             android:label=""
@@ -53,8 +54,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".UnlockedSongActivity"
+        <activity
+            android:name=".UnlockedSongActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".UpdateSongActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 

@@ -9,6 +9,7 @@ import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.TextView
 import org.apache.commons.io.FileUtils
 import org.jsoup.Jsoup
 import java.io.File
@@ -16,11 +17,10 @@ import java.io.IOException
 import java.net.URL
 
 
-class DownloadTask(val progressbar: ProgressBar): AsyncTask<Int, Double, Int>() {
+class DownloadTask(val progressbar: ProgressBar, val textview:TextView, val current:Int, val newest:Int): AsyncTask<Int, Double, Int>() {
 
     private val root = Environment.getExternalStorageDirectory()
-    private var current = 0
-    private var newest = 0
+    //private var newest = 0
     private val url = "http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/"
 
     fun formatNum(i : Int): String =
@@ -32,13 +32,7 @@ class DownloadTask(val progressbar: ProgressBar): AsyncTask<Int, Double, Int>() 
     override fun onPreExecute() {
         progressbar.visibility = View.VISIBLE
         progressbar.setProgress(0)
-        val root = Environment.getExternalStorageDirectory().absolutePath + "/songlist"
-        val songdir = File(root)
-/*        if(songdir.exists()){
-            val a = songdir.list()
-            current = a.size
-
-        }*/
+        textview.text = "downloading: 0 / ${newest-current}"
     }
 
     override fun doInBackground(vararg params: Int?): Int {
@@ -47,25 +41,27 @@ class DownloadTask(val progressbar: ProgressBar): AsyncTask<Int, Double, Int>() 
 
 
         val songs = doc.select("Song > Number")
-        newest = songs.last().html().toInt()
+//        newest = songs.last().html().toInt()
 
-        if (current <= songs.last().html().toInt()) {
+        if (current <= newest) {
 
-            newest = songs.last().html().toInt()
+
             try {
-                val songdir = File(root.absolutePath + "/songlist")
+                val songdir = File(root.absolutePath,  "songlist")
                 if (!songdir.exists()) {
                     Log.d("Datascrap", "not exist")
                     songdir.mkdir()
                 }
-                //FileUtils.copyURLToFile(URL(songlisturl), File(songdir.absolutePath+"/songs.xml"))
+
 
                 for (i in current+1..newest) {
-                        val mapurl = url + formatNum(i) + "/" + "map5.kml"
-                        val lyricsurl = url + formatNum(i) + "/" + "words.txt"
-                        FileUtils.copyURLToFile(URL(mapurl), File(songdir.absolutePath, formatNum(i) + "/" + "map5.kml"))
-                        FileUtils.copyURLToFile(URL(lyricsurl), File(songdir.absolutePath, formatNum(i) + "/" + "words.txt"))
-                        publishProgress(i/(newest-current-1).toDouble())
+                    val map5url = url + formatNum(i) + "/" + "map5.kml"
+                    val map4url = url +formatNum(i) +"/"+"map4.kml"
+                    val lyricsurl = url + formatNum(i) + "/" + "words.txt"
+                    FileUtils.copyURLToFile(URL(map5url), File(songdir.absolutePath, formatNum(i) + "/" + "map5.kml"))
+                    FileUtils.copyURLToFile(URL(map4url), File(songdir.absolutePath, formatNum(i) + "/" + "map4.kml"))
+                    FileUtils.copyURLToFile(URL(lyricsurl), File(songdir.absolutePath, formatNum(i) + "/" + "words.txt"))
+                    publishProgress(i/(newest-current-1).toDouble(), i.toDouble())
 
                 }
             }catch (exception: IOException){
@@ -79,13 +75,19 @@ class DownloadTask(val progressbar: ProgressBar): AsyncTask<Int, Double, Int>() 
     override fun onProgressUpdate(vararg values: Double?) {
         val progress = (values[0]!!*100).toInt()
         progressbar.setProgress(progress)
+        textview.text="downloading: ${values[1]!!.toInt()} / ${newest-current}"
     }
 
     override fun onPostExecute(result: Int?) {
-        progressbar.visibility = View.GONE
+        //progressbar.visibility = View.GONE
+        progressbar.setProgress(100)
+        textview.text="complete!"
 
     }
 }
+
+
+
 
 
 

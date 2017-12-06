@@ -2,15 +2,10 @@ package com.example.haoyu.helloworldwithkotlin
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Environment
 import android.support.design.widget.NavigationView
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
-import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
@@ -20,11 +15,13 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import com.ogaclejapan.smarttablayout.SmartTabLayout
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems
 import org.jetbrains.anko.find
+import org.jetbrains.anko.toast
+import org.jsoup.Jsoup
+import java.io.File
 
 class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
 
@@ -45,8 +42,13 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             editor.putString("username", "admin")
             editor.apply()
         }
+        if(!pref.contains("songNum"))
+        {
+            val editor = pref.edit()
+            editor.putInt("songNum", 0)
+            editor.apply()
+        }
         user = pref.getString("username", "admin")
-        timelineitemlist = SFileManager(user!!).getTI()
 
         mPager = findViewById(R.id.pager) as ViewPager
         val adapter = FragmentPagerItemAdapter(
@@ -59,35 +61,14 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val viewPagerTab = findViewById(R.id.viewpagertab) as SmartTabLayout
         viewPagerTab.setViewPager(mPager)
         mPager!!.currentItem=1
+
+
         //initTimelineItems()
         recyclerview = find(R.id.recycler_view_timeline)
         val layoutmanager = LinearLayoutManager(this)
         recyclerview!!.layoutManager=layoutmanager
-        val timeline_adapter = TimelineAdapter(timelineitemlist)
-        recyclerview!!.adapter = timeline_adapter
 
 
-
-
-        //Progress Bar implementation
-/*        val fab = findViewById(R.id.fab) as FloatingActionButton
-        fab.setOnClickListener { view ->
-            val progressbar = findViewById(R.id.progressBar1) as ProgressBar
-            if(isExternalStorageWritable()) {
-                try {
-
-                    progressbar.max = 100
-                    DownloadTask(progressbar).execute(100)
-                } catch (e: IOException) {
-                    Toast.makeText(this, "download failed", Toast.LENGTH_SHORT).show()
-                }
-
-            }else
-                Toast.makeText(this, "unreadable", Toast.LENGTH_SHORT).show()
-
-
-
-        }*/
 
         val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
         val toggle = ActionBarDrawerToggle(
@@ -98,9 +79,18 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val navigationView = findViewById(R.id.nav_view) as NavigationView
         navigationView.setNavigationItemSelectedListener(this)
 
+        val (current, newest)=checkUpdate()
+        if(current<newest)
+        {
+            val intent = Intent(this, UpdateSongActivity::class.java)
+            intent.putExtra("current", current)
+            intent.putExtra("newest", newest)
+            startActivity(intent)
+        }
     }
 
     override fun onResume() {
+
         timelineitemlist = SFileManager(user!!).getTI()
         val timeline_adapter = TimelineAdapter(timelineitemlist)
         recyclerview!!.adapter = timeline_adapter
@@ -143,20 +133,33 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val id = item.itemId
 
         if (id == R.id.nav_sync) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-            val intent = Intent(this, MapsActivity::class.java)
-            startActivity(intent)
-
-        } else if (id == R.id.nav_unlockedsong) {
+            val (current, newest)=checkUpdate()
+            if(current<newest)
+            {
+                val intent = Intent(this, UpdateSongActivity::class.java)
+                intent.putExtra("current", current)
+                intent.putExtra("newest", newest)
+                startActivity(intent)
+            }
+            else{
+                toast("no new update")
+            }
+        }
+        else if (id == R.id.nav_gallery) {
+//            val intent = Intent(this, MapsActivity::class.java)
+//            startActivity(intent)
+        }
+        else if (id == R.id.nav_unlockedsong) {
             val intent = Intent(this, UnlockedSongActivity::class.java)
             startActivity(intent)
+        }
+        else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_manage) {
+        }
+        else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        }
+        else if (id == R.id.nav_send) {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
 
@@ -166,6 +169,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         drawer.closeDrawer(GravityCompat.START)
         return true
     }
+
     fun isExternalStorageWritable():Boolean=
             Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
 
@@ -173,13 +177,21 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())||
                     Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())
 
-    private fun initTimelineItems(){
-        timelineitemlist.add(TimelineItem("2015-01", "1","love you forever"))
-        timelineitemlist.add(TimelineItem("2015-01", "0","dismiss"))
-        timelineitemlist.add(TimelineItem("2015-02", "0","love you forever"))
-        timelineitemlist.add(TimelineItem("2015-01", "1","Interesting"))
-        timelineitemlist.add(TimelineItem("2015-01", "1","what's wrong"))
-        timelineitemlist.add(TimelineItem("2015-01", "0","who are you"))
-        timelineitemlist.add(TimelineItem("2015-01", "1","Jillian"))
+    private fun checkUpdate():ArrayList<Int>{
+        val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
+        var a = 0
+        val thread = Thread {
+            val soup = Jsoup.connect("http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/songs.xml").get()
+            val songs = soup.select("Song > Number")
+            val newest = songs.last().html().toInt()
+            a=newest
+        }
+        thread.start()
+        thread.join()
+        val songlistdir = File(Environment.getExternalStorageDirectory().absolutePath, "songlist")
+        var current = pref.getInt("songNum", 0)
+        if(songlistdir.list().size != current)
+            current=0
+        return (arrayListOf(current, a))
     }
 }

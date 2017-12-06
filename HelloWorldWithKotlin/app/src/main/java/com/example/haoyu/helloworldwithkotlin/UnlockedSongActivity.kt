@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import co.dift.ui.SwipeToAction
+import org.jetbrains.anko.find
 import org.jetbrains.anko.toast
 
 class UnlockedSongActivity : AppCompatActivity() {
@@ -21,8 +23,8 @@ class UnlockedSongActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_unlocked_song)
-        val mytoolbar = findViewById(R.id.my_toolbar) as android.support.v7.widget.Toolbar
-        mytoolbar.setNavigationIcon(resources.getDrawable(R.mipmap.back))
+        val mytoolbar = find<Toolbar>(R.id.my_toolbar)
+        mytoolbar.navigationIcon=resources.getDrawable(R.mipmap.back)
         mytoolbar.setOnClickListener{
             finish()
         }
