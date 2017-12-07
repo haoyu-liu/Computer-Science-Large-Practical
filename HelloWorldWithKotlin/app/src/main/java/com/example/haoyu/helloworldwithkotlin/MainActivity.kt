@@ -16,15 +16,11 @@ import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.CardView
 import android.transition.Explode
-import android.util.Log
-import android.view.Display
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.Toast
 import org.jetbrains.anko.find
-import java.io.IOException
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 

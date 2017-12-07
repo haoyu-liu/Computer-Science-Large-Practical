@@ -24,9 +24,9 @@ class SongParser(val index: Int, val version: Int){
     val songlist = mutableListOf<Song>()
     var song:Song?=null
 
-    fun formatNum(i: Int) :String = if (i<10)
+    private fun formatNum(i: Int) :String = if (i<10)
         "0"+i.toString()
-    else i.toString()
+        else i.toString()
 
     init{
         val thread = Thread{
@@ -56,9 +56,9 @@ class SongParser(val index: Int, val version: Int){
         val lyrics= mutableListOf<String>()
         songtxt.useLines { lines -> lines.forEach { lyrics.add(it.trim()) }}
         for (i in lyrics.indices){
-            val words = lyrics[i].split(*arrayOf(" ", "\t"))
+            val words = lyrics[i].split(" ", "\t")
             for (j in words.indices){
-                lyricsmap.put((i+1).toString()+":"+j.toString(), words[j].trim(*charArrayOf('?', '.', ',' , ')', '!', '(')))
+                lyricsmap.put((i+1).toString()+":"+j.toString(), words[j].trim('?', '.', ',', ')', '!', '('))
             }
         }
         return markerList
@@ -67,8 +67,8 @@ class SongParser(val index: Int, val version: Int){
 
     fun loadSongList() : MutableList<Song>{
         val xml = Jsoup.connect("http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/songs.xml").get()
-        val Songs = xml.select("Song")
-        Songs.forEach { song ->
+        val songs = xml.select("Song")
+        songs.forEach { song ->
             val number = song.select("Number").html()
             val artist = song.select("Word").html()
             val title = song.select("Title").html()

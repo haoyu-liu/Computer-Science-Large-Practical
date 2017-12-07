@@ -122,7 +122,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             songParser = SongParser(randNum, 5)
 
         song = songParser!!.song
-        Log.d("songname>>>>>>>", "${song!!.Title}")
+        Log.d("tvSongName>>>>>>>", "${song!!.Title}")
         lyricHashMap = songParser!!.lyricsmap
 
 
@@ -173,27 +173,29 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
 
         val markersInMapList = mutableListOf<marker>()
 
-        if(degree == "Easy"){
-            allmarkerList.forEach { v ->
-                if(Random().nextDouble()>0.75)
-                    markersInMapList.add(v)
+        when (degree) {
+            "Easy" -> {
+                allmarkerList.forEach { v ->
+                    if(Random().nextDouble()>0.75)
+                        markersInMapList.add(v)
+                }
+                return markersInMapList
             }
-            return markersInMapList
-        }
-        else if(degree == "Moderate"){
+            "Moderate" -> {
 
-            allmarkerList.forEach { v->
-                if(Random().nextDouble()>0.8)
-                    markersInMapList.add(v)
+                allmarkerList.forEach { v->
+                    if(Random().nextDouble()>0.8)
+                        markersInMapList.add(v)
+                }
+                return markersInMapList
             }
-            return markersInMapList
-        }
-        else{
-            allmarkerList.forEach { v->
-                if(Random().nextDouble()>0.85)
-                    markersInMapList.add(v)
+            else -> {
+                allmarkerList.forEach { v->
+                    if(Random().nextDouble()>0.85)
+                        markersInMapList.add(v)
+                }
+                return markersInMapList
             }
-            return markersInMapList
         }
     }
 
@@ -207,8 +209,8 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             override fun onTick(millisUntilFinished: Long) {
                 var secondsLeft = millisUntilFinished / 1000
                 val minutesLeft = secondsLeft / 60
-                secondsLeft = secondsLeft - minutesLeft * 60
-                countdowntTextView!!.setText(minutesLeft.toString()+" : "+secondsLeft.toString())
+                secondsLeft -= minutesLeft * 60
+                countdowntTextView!!.text = minutesLeft.toString()+" : "+secondsLeft.toString()
             }
 
         }
@@ -218,8 +220,8 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     override fun onClick(v: View?) {
         when(v!!.id){
             R.id.confirm_button ->{
-                val edittext = find<EditText>(R.id.answer_edittext)
-                if(edittext.text.toString() == song!!.Title){
+                val editText = find<EditText>(R.id.answer_edittext)
+                if(editText.text.toString() == song!!.Title){
                     onSuccess()
                     finish()
                 }
@@ -231,7 +233,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
 
         val markerLocation = Location("marker")
         markerLocation.latitude = p0!!.position.latitude
-        markerLocation.longitude = p0!!.position.longitude
+        markerLocation.longitude = p0.position.longitude
         val distance = markerLocation.distanceTo(mLastLocation)
         if(distance<15){
             val word = lyricHashMap!![markersHashMap[p0]!!.name]
@@ -377,7 +379,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     fun ClosedRange<Int>.random()=
             Random().nextInt(endInclusive-start)+start
 
-    fun constructData(): List<Type> =
+    private fun constructData(): List<Type> =
             Arrays.asList(Type("boring", obtained_boringword), Type("notboring", obtained_notboringword),
                     Type("interesting", obtained_interestingword), Type("veryinteresting", obtained_veryinterestingword),
                     Type("unclassified", obtained_unclassifiedword))

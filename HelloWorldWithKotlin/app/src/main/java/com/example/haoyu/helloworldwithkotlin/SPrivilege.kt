@@ -7,7 +7,7 @@ import android.content.Context
  */
 class SPrivilege(context: Context) {
 
-    val pref = context.getSharedPreferences("user", Context.MODE_PRIVATE)
+    private val pref = context.getSharedPreferences("user", Context.MODE_PRIVATE)!!
 
     fun isUserLogined():Boolean{
 

@@ -7,6 +7,7 @@ import android.widget.TextView
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
 import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder
 import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder
+import org.jetbrains.anko.find
 import org.w3c.dom.Text
 
 /**
@@ -24,16 +25,12 @@ class WordViewHolder(itemView: View): ChildViewHolder(itemView){
 
 class TypeViewHolder(itemView: View): GroupViewHolder(itemView){
 
-    private var typename: TextView? =null
-    private var arrow:ImageView?=null
+    private val typename=itemView.find<TextView>(R.id.list_item_type_name)
+    private val arrow=itemView.find<ImageView>(R.id.list_item_type_arrow)
 
-    init{
-        typename = itemView.findViewById(R.id.list_item_type_name) as TextView
-        arrow = itemView.findViewById(R.id.list_item_type_arrow) as ImageView
-    }
 
     fun setTypeTitle(type: ExpandableGroup<*>?){
-        typename!!.setText(type!!.title)
+        typename.text = type!!.title
     }
 
     override fun expand() {
@@ -48,7 +45,7 @@ class TypeViewHolder(itemView: View): GroupViewHolder(itemView){
         val rotate = RotateAnimation(360F, 180F, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f)
         rotate.duration=300
         rotate.fillAfter=true
-        arrow!!.animation=rotate
+        arrow.animation=rotate
 
     }
 
@@ -56,7 +53,7 @@ class TypeViewHolder(itemView: View): GroupViewHolder(itemView){
         val rotate = RotateAnimation(180F, 360F, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f)
         rotate.duration=300
         rotate.fillAfter=true
-        arrow!!.animation=rotate
+        arrow.animation=rotate
 
     }
 }

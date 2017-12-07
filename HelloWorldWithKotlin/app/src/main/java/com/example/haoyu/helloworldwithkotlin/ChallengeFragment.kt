@@ -28,9 +28,9 @@ class ChallengeFragment: Fragment(), View.OnClickListener{
         btn!!.setOnClickListener(this)
 
         spinner_challenge = v.findViewById(R.id.challenge_spinner) as Spinner
-        val spinneradapter = ArrayAdapter.createFromResource(this.activity, R.array.mode, R.layout.spinner_item)
-        spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner_challenge!!.adapter = spinneradapter
+        val spinnerAdapter = ArrayAdapter.createFromResource(this.activity, R.array.mode, R.layout.spinner_item)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner_challenge!!.adapter = spinnerAdapter
 
         return v
     }

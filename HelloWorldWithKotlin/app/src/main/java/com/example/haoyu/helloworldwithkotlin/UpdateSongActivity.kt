@@ -31,9 +31,9 @@ class UpdateSongActivity : AppCompatActivity() {
 
         progressbar = find(R.id.progressBar1)
         textview=find(R.id.textview_progress)
-        val mytoolbar = find<Toolbar>(R.id.toolbar_updating_songs)
-        mytoolbar.navigationIcon=resources.getDrawable(R.mipmap.back)
-        mytoolbar.setOnClickListener{
+        val myToolBar = find<Toolbar>(R.id.toolbar_updating_songs)
+        myToolBar.navigationIcon=resources.getDrawable(R.mipmap.back)
+        myToolBar.setOnClickListener{
             finish()
         }
 
@@ -58,10 +58,10 @@ class UpdateSongActivity : AppCompatActivity() {
             toast("unreadable")
     }
 
-    fun isExternalStorageWritable():Boolean=
+    private fun isExternalStorageWritable():Boolean=
             Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()
 
-    fun isExternalStrorageReadable():Boolean =
+    private fun isExternalStrorageReadable():Boolean =
             Environment.MEDIA_MOUNTED == Environment.getExternalStorageState() ||
                     Environment.MEDIA_MOUNTED_READ_ONLY == Environment.getExternalStorageState()
 }

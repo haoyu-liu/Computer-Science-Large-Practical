@@ -37,11 +37,11 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         setSupportActionBar(toolbar)
 
         val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
-        if(!pref.contains("username")){
+/*        if(!pref.contains("username")){
             val editor = pref.edit()
             editor.putString("username", "admin")
             editor.apply()
-        }
+        }*/
         if(!pref.contains("songNum"))
         {
             val editor = pref.edit()
@@ -50,7 +50,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         }
         user = pref.getString("username", "admin")
 
-        mPager = findViewById(R.id.pager) as ViewPager
+        mPager = find(R.id.pager)
         val adapter = FragmentPagerItemAdapter(
             supportFragmentManager, FragmentPagerItems.with(this)
                 .add("casual", CasualFragment::class.java)
@@ -70,7 +70,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
 
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+        val drawer = find<DrawerLayout>(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer.setDrawerListener(toggle)
@@ -92,20 +92,19 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     override fun onResume() {
 
         timelineitemlist = SFileManager(user!!).getTI()
-        val timeline_adapter = TimelineAdapter(timelineitemlist)
-        recyclerview!!.adapter = timeline_adapter
+        val timelineAdapter = TimelineAdapter(timelineitemlist)
+        recyclerview!!.adapter = timelineAdapter
         super.onResume()
     }
 
 
     override fun onBackPressed() {
         val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
-        if (drawer.isDrawerOpen(GravityCompat.START))
-            drawer.closeDrawer(GravityCompat.START)
-        else if(mPager!!.currentItem!=0)
-            mPager!!.setCurrentItem(mPager!!.currentItem-1)
-        else
-            super.onBackPressed()
+        when {
+            drawer.isDrawerOpen(GravityCompat.START) -> drawer.closeDrawer(GravityCompat.START)
+            mPager!!.currentItem!=0 -> mPager!!.currentItem = mPager!!.currentItem-1
+            else -> super.onBackPressed()
+        }
 
     }
 
@@ -189,9 +188,9 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         }
         thread.start()
         thread.join()
-        val songlistdir = File(Environment.getExternalStorageDirectory().absolutePath, "songlist")
+        val songlistDir = File(Environment.getExternalStorageDirectory().absolutePath, "songlist")
         var current = pref.getInt("songNum", 0)
-        if(!songlistdir.exists()||songlistdir.list().size != current)
+        if(!songlistDir.exists()||songlistDir.list().size != current)
             current=0
         return (arrayListOf(current, a))
     }

@@ -18,7 +18,7 @@ class Word : Parcelable {
         //this.isFavorite = isFavorite
     }
 
-    protected constructor(`in`: Parcel) {
+    private constructor(`in`: Parcel) {
         name = `in`.readString()
     }
 
@@ -33,11 +33,7 @@ class Word : Parcelable {
 
     }
 
-    override fun hashCode(): Int {
-        val result = if (name != null) name!!.hashCode() else 0
-        //result = 31 * result + if (isFavorite!!) 1 else 0
-        return result
-    }
+    override fun hashCode(): Int = if (name != null) name!!.hashCode() else 0
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(name)

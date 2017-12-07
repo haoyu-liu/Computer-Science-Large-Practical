@@ -21,12 +21,12 @@ class Type(title: String, items: List<Word>) : ExpandableGroup<Word>(title, item
     }
 
     override fun hashCode(): Int {
-        when(mtitle){
-            "boring" -> return 0
-            "notboring" ->return 1
-            "interesting" -> return 2
-            "veryinteresting" -> return 3
-            else -> return 4
+        return when(mtitle){
+            "boring" -> 0
+            "notboring" -> 1
+            "interesting" -> 2
+            "veryinteresting" -> 3
+            else -> 4
         }
     }
 }

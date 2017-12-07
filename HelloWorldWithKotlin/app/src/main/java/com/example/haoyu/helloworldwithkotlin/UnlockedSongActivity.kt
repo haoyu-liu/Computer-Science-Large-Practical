@@ -1,6 +1,8 @@
 package com.example.haoyu.helloworldwithkotlin
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -18,14 +20,14 @@ class UnlockedSongActivity : AppCompatActivity() {
 
     private var songlist : MutableList<Song>? = null
     private var adapter: SongAdapter? =null
-    var swipeToAction: SwipeToAction? =null
+    private var swipeToAction: SwipeToAction? =null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_unlocked_song)
-        val mytoolbar = find<Toolbar>(R.id.my_toolbar)
-        mytoolbar.navigationIcon=resources.getDrawable(R.mipmap.back)
-        mytoolbar.setOnClickListener{
+        val myToolBar = find<Toolbar>(R.id.my_toolbar)
+        myToolBar.navigationIcon=resources.getDrawable(R.mipmap.back)
+        myToolBar.setOnClickListener{
             finish()
         }
         //initSong()
@@ -33,10 +35,11 @@ class UnlockedSongActivity : AppCompatActivity() {
         val user = pref.getString("username", "admin")
         songlist = SFileManager(user).getUSL()
 
-        val recyclerview = findViewById(R.id.recycler_view) as RecyclerView
+        val recyclerview = find<RecyclerView>(R.id.recycler_view)
         val layoutManager = LinearLayoutManager(this)
         recyclerview.layoutManager = layoutManager
         recyclerview.setHasFixedSize(true)
+
 
         adapter = SongAdapter(songlist!!)
         recyclerview.adapter = adapter
@@ -52,13 +55,17 @@ class UnlockedSongActivity : AppCompatActivity() {
             }
 
             override fun swipeRight(itemData: Song?): Boolean {
-                toast("swiperight")
+                /////////////////////////////////
+                //rmb :remove info in XML////////
+                /////////////////////////////////
+                removeSong(itemData!!)
+                toast("removed")
                 return true
             }
 
             override fun swipeLeft(itemData: Song?): Boolean {
-                removeSong(itemData!!)
-                toast("removed")
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(itemData!!.Link)))
+                toast("swiperight")
                 return true
             }
         })

@@ -10,26 +10,23 @@ import android.view.ViewAnimationUtils
 import android.view.animation.AccelerateInterpolator
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.Environment
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.ActivityOptionsCompat
 import android.transition.Explode
 import android.widget.Button
 import android.widget.EditText
 import org.jetbrains.anko.find
-import java.io.File
 
 class RegisterActivity : AppCompatActivity(), View.OnClickListener{
 
     private var fab: FloatingActionButton? = null
     private var cvAdd: CardView? = null
-    private var bt_reg_go: Button?=null
-    private var et_username: EditText?=null
-    private var et_password: EditText?=null
-    private var et_repeatpassword:EditText?=null
+    private var btRegGo: Button?=null
+    private var etUsername: EditText?=null
+    private var etPassword: EditText?=null
+    private var etRepeatPassword:EditText?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,29 +35,29 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
 
         fab = find(R.id.fab)
         cvAdd = find(R.id.cv_add)
-        bt_reg_go = find(R.id.bt_reg_go)
-        et_username = find(R.id.et_username)
-        et_password = find(R.id.et_password)
-        et_repeatpassword = find(R.id.et_repeatpassword)
+        btRegGo = find(R.id.bt_reg_go)
+        etUsername = find(R.id.et_username)
+        etPassword = find(R.id.et_password)
+        etRepeatPassword = find(R.id.et_repeatpassword)
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ShowEnterAnimation()
         }
         fab!!.setOnClickListener(this)
-        bt_reg_go!!.setOnClickListener(this)
+        btRegGo!!.setOnClickListener(this)
     }
 
     override fun onClick(v: View?) {
         when(v!!.id){
             R.id.fab -> animateRevealClose()
             R.id.bt_reg_go -> {
-                val username = et_username!!.text.toString()
-                val password = et_password!!.text.toString()
-                val reapeatpassword = et_repeatpassword!!.text.toString()
+                val username = etUsername!!.text.toString()
+                val password = etPassword!!.text.toString()
+                val reapeatPassword = etRepeatPassword!!.text.toString()
                 val sfileManager = SFileManager(username)
 
-                if(password==reapeatpassword && (!sfileManager.isUserExists())) {
+                if(password==reapeatPassword && (!sfileManager.isUserExists())) {
                     sfileManager.createUser(password)
                     SPrivilege(this).updateUser(username)
 

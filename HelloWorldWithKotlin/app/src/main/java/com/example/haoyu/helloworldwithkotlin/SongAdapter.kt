@@ -35,18 +35,14 @@ class SongAdapter(val msonglist: List<Song>) : RecyclerView.Adapter<RecyclerView
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
-        val song = msonglist.get(position)
+        val song = msonglist[position]
         val svh = holder as SongViewHolder
-        svh!!.title!!.setText(song.Title)
-        svh!!.artist!!.setText(song.Artist)
+        svh.title!!.setText(song.Title)
+        svh.artist!!.setText(song.Artist)
         svh.data=song
     }
 
-    override fun getItemCount(): Int {
-        return msonglist.size
-    }
+    override fun getItemCount(): Int = msonglist.size
 
-    override fun getItemViewType(position: Int): Int {
-        return 0
-    }
+    override fun getItemViewType(position: Int): Int = 0
 }

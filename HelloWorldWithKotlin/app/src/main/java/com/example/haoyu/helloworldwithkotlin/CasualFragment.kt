@@ -28,9 +28,9 @@ class CasualFragment:Fragment(), View.OnClickListener{
         btn!!.setOnClickListener(this)
 
         spinner_casual = v.findViewById(R.id.casual_spinner) as Spinner
-        val spinneradapter = ArrayAdapter.createFromResource(this.activity, R.array.mode, R.layout.spinner_item)
-        spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner_casual!!.adapter = spinneradapter
+        val spinnerAdapter = ArrayAdapter.createFromResource(this.activity, R.array.mode, R.layout.spinner_item)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner_casual!!.adapter = spinnerAdapter
         return v
     }
 

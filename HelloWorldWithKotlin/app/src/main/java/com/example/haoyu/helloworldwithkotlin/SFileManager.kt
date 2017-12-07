@@ -26,10 +26,7 @@ class SFileManager(val user : String) {
         val passwdFile = File(root, "passwd.txt")
         if(!passwdFile.exists())
             return false
-        for(line in passwdFile.readLines())
-            if(line.contains(user))
-                return true
-        return false
+        return passwdFile.readLines().any { it.contains(user) }
     }
 
     fun createUser(passwd: String): Boolean{
@@ -93,7 +90,7 @@ class SFileManager(val user : String) {
     }
 
 
-    fun parseSingleItem(item: Element): TimelineItem{
+    private fun parseSingleItem(item: Element): TimelineItem{
         val time = item.select("time").html()
         val result = item.select("result").html()
         val song= item.select("index").html()
@@ -103,7 +100,7 @@ class SFileManager(val user : String) {
 
     fun getTI(): ArrayList<TimelineItem>{
         val timelineFile = File(usrdir.absolutePath, "timeline.xml")
-        if(timelineFile.exists()) {
+        return if(timelineFile.exists()) {
             val soup = Jsoup.parse(timelineFile, "UTF-8")
             val timelineItemList = ArrayList<TimelineItem>()
             val items = soup.select("item")
@@ -111,17 +108,17 @@ class SFileManager(val user : String) {
                 timelineItemList.add(parseSingleItem(v))
             }
             timelineItemList.reverse()
-            return timelineItemList
+            timelineItemList
         }
         else
-            return ArrayList<TimelineItem>()
+            ArrayList<TimelineItem>()
     }
 
 
-    fun parseSingleSong(song: Element):Song{
+    private fun parseSingleSong(song: Element):Song{
         val number = song.select("number").html()
         val artist = song.select("artist").html()
-        val title = song.select("index").html()
+        val title = song.select("title").html()
         val link = song.select("link").html()
         return Song(number, artist, title, link)
     }
@@ -129,16 +126,16 @@ class SFileManager(val user : String) {
 
     fun getUSL(): MutableList<Song>{
         val unlockedSongListFile = File(usrdir.absolutePath, "USL.xml")
-        if(unlockedSongListFile.exists()) {
+        return if(unlockedSongListFile.exists()) {
             val soup = Jsoup.parse(unlockedSongListFile, "UTF-8")
             val songlist = mutableListOf<Song>()
             val songs = soup.select("index")
             songs.forEach { v ->
                 songlist.add(parseSingleSong(v))
             }
-            return songlist
+            songlist
         }
         else
-            return mutableListOf<Song>()
+            mutableListOf<Song>()
     }
 }
