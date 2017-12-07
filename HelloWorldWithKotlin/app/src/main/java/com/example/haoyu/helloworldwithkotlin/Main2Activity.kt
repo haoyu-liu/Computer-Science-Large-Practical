@@ -160,6 +160,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         }
         else if (id == R.id.nav_send) {
+            SPrivilege(this).updateUser("null")
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
 
@@ -190,7 +191,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         thread.join()
         val songlistdir = File(Environment.getExternalStorageDirectory().absolutePath, "songlist")
         var current = pref.getInt("songNum", 0)
-        if(songlistdir.list().size != current)
+        if(!songlistdir.exists()||songlistdir.list().size != current)
             current=0
         return (arrayListOf(current, a))
     }

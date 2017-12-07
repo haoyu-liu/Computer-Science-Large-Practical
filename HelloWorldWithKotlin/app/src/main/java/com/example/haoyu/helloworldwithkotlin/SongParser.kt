@@ -15,8 +15,8 @@ data class marker(val name: String, val longitude: String, val latitude: String,
 class SongParser(val index: Int, val version: Int){
 
 
-    private var songkml = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/"+formatNum(index)+"/map"+version.toString()+".kml")
-    private var songtxt = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/01/words.txt")
+    private var songkml = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/${formatNum(index)}/map${version.toString()}.kml")
+    private var songtxt = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/${formatNum(index)}/words.txt")
     private var songlistxml = File(Environment.getExternalStorageDirectory().absolutePath + "/songlist/songs.xml")
     private val description = hashMapOf<String, String>()
     private val markerList= mutableListOf<marker>()

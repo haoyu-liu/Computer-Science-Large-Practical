@@ -22,19 +22,32 @@ class SFileManager(val user : String) {
             admindir.mkdirs()
     }
 
-
-    fun createUser(passwd: String){
-        if(!usrdir.exists())
-            usrdir.mkdirs()
-
+    fun isUserExists():Boolean{
         val passwdFile = File(root, "passwd.txt")
-        passwdFile.appendText("$user $passwd")
+        if(!passwdFile.exists())
+            return false
+        for(line in passwdFile.readLines())
+            if(line.contains(user))
+                return true
+        return false
+    }
+
+    fun createUser(passwd: String): Boolean{
+        if(!usrdir.exists()) {
+            usrdir.mkdirs()
+            val passwdFile = File(root, "passwd.txt")
+            passwdFile.appendText("$user $passwd")
+            return true
+        }
+        return false
 
     }
 
 
     fun authenticate(passwd: String): Boolean{
         val passwdFile = File(root, "passwd.txt")
+        if(!passwdFile.exists())
+            return false
         for(line in passwdFile.readLines()){
             val(__user, __passwd) = line.split(" ")
             if(user == __user && passwd ==__passwd)
