@@ -1,15 +1,19 @@
 package com.example.haoyu.helloworldwithkotlin
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.ConnectivityManager
 import android.support.v4.app.FragmentActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Environment
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
+import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -25,8 +29,9 @@ import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.premnirmal.Magnet.IconCallback
 import com.premnirmal.Magnet.Magnet
-import org.jetbrains.anko.find
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.*
+import org.jetbrains.anko.design.longSnackbar
+import org.jetbrains.anko.design.snackbar
 import java.io.File
 import java.text.DateFormat
 import java.util.*
@@ -72,6 +77,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
+
         mapFragment.getMapAsync(this)
         mGoogleApiClient = GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -115,7 +121,8 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         sfileManager = SFileManager(user!!)
 
         //init SongParser
-        val randNum = (1..18).random()
+        val songNum =pref.getInt("songNum", 1)
+        val randNum = (1..songNum).random()
         if(degree == "Hard")
             songParser = SongParser(randNum, 4)
         else
@@ -269,8 +276,8 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     private fun onSuccess(){
         val time = DateFormat.getDateTimeInstance().format(Date())
         val result = "1"
-        val song = this.song!!.Title
-        sfileManager!!.updateTI(TimelineItem(time, result, song))
+        val name = this.song!!.Title
+        sfileManager!!.updateTI(TimelineItem(time, result, name))
         sfileManager!!.updateUSL(this.song!!)
         magnet!!.destroy()
 
@@ -302,7 +309,6 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
 
     }
 
-
     override fun onStart() {
         mGoogleApiClient!!.connect()
         super.onStart()
@@ -330,8 +336,6 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     }
 
 
-
-
     private fun enableMyLocation()=
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 !=PackageManager.PERMISSION_GRANTED){
@@ -339,7 +343,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         }
         else mMap!!.isMyLocationEnabled = true
 
-    fun createLocationRequest(){
+    private fun createLocationRequest(){
         val mLocationRequest = LocationRequest()
         mLocationRequest.interval = 3000
         mLocationRequest.fastestInterval = 1000
@@ -374,15 +378,34 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
 
     override fun onConnectionFailed(p0: ConnectionResult) {
         Log.d("mapactivity", ">>>onConnectedFailed")
+
     }
 
-    fun ClosedRange<Int>.random()=
-            Random().nextInt(endInclusive-start)+start
+    fun ClosedRange<Int>.random():Int {
+        val manager = SFileManager(user!!)
+        while(true) {
+            val num = Random().nextInt(endInclusive - start) + start
+            if(manager.isSongAvailable(num))
+                return num
+        }
+
+    }
 
     private fun constructData(): List<Type> =
             Arrays.asList(Type("boring", obtained_boringword), Type("notboring", obtained_notboringword),
                     Type("interesting", obtained_interestingword), Type("veryinteresting", obtained_veryinterestingword),
                     Type("unclassified", obtained_unclassifiedword))
+
+
+    private inner class NetworkChangeReceiver: BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val connectivityManager = context!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val networkInfo = connectivityManager.activeNetworkInfo
+            if(networkInfo==null || !networkInfo.isAvailable){
+                longSnackbar(find<RecyclerView>(R.id.countdown_text), "network unavailable, please check your network")
+            }
+        }
+    }
 }
 
 

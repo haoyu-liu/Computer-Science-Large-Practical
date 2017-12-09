@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import co.dift.ui.SwipeToAction
+import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.find
 import org.jetbrains.anko.toast
 
@@ -55,11 +56,9 @@ class UnlockedSongActivity : AppCompatActivity() {
             }
 
             override fun swipeRight(itemData: Song?): Boolean {
-                /////////////////////////////////
-                //rmb :remove info in XML////////
-                /////////////////////////////////
-                removeSong(itemData!!)
-                toast("removed")
+                SFileManager(user).removeFromUSL(itemData!!)
+                removeSong(itemData)
+                snackbar(find<RecyclerView>(R.id.recycler_view), "removed")
                 return true
             }
 

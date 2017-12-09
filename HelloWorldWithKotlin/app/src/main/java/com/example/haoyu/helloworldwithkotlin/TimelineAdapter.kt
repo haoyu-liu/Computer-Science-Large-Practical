@@ -8,6 +8,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import org.jetbrains.anko.find
+import android.util.TypedValue
+
+
 
 /**
  * Created by HAOYU on 2017/11/29.
@@ -23,6 +26,7 @@ class TimelineAdapter(private val timelineItemList: List<TimelineItem>) : Recycl
         val tvSuccessTime=view.find<TextView>(R.id.textview_success_time)
         val tvFailTime=view.find<TextView>(R.id.textview_fail_time)
         val ivResultIcon=view.find<ImageView>(R.id.result_image)
+        val tvSongNameFail=view.find<TextView>(R.id.textview_songname_fail)
 
     }
 
@@ -39,6 +43,7 @@ class TimelineAdapter(private val timelineItemList: List<TimelineItem>) : Recycl
             holder.tvSuccessTime.text = timelineItem.time
         }else if(timelineItem.result=="0"){
             holder.cdSuccess.visibility=View.INVISIBLE
+            holder.tvSongNameFail.text=timelineItem.song
             holder.tvFailTime.text = timelineItem.time
             holder.ivResultIcon.setImageResource(R.mipmap.fail_icon)
         }

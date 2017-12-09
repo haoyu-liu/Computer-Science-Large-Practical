@@ -1,6 +1,8 @@
 package com.example.haoyu.helloworldwithkotlin
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -9,7 +11,12 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.find
+import org.jetbrains.anko.noButton
+import org.jetbrains.anko.support.v4.alert
+import org.jetbrains.anko.support.v4.startActivity
+import org.jetbrains.anko.yesButton
 
 /**
  * Created by HAOYU on 2017/11/28.
@@ -38,10 +45,16 @@ class ChallengeFragment: Fragment(), View.OnClickListener{
     override fun onClick(v: View?) {
         if(v!!.id == R.id.start_chalg_btn)
         {
-            val intent = Intent(activity, MapsActivity::class.java)
-            intent.putExtra("mode", "Challenge")
-            intent.putExtra("degree", spinner_challenge!!.selectedItem.toString())
-            startActivity(intent)
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val networkInfo = connectivityManager.activeNetworkInfo
+            if(networkInfo==null || !networkInfo.isAvailable){
+                alert("Please turn on Internet service and try again", "No Network Connection") {
+                    yesButton {}
+                    noButton {}
+                }.show()
+            }else {
+                startActivity<MapsActivity>("mode" to "Challenge", "degree" to spinner_challenge!!.selectedItem.toString())
+            }
         }
     }
 

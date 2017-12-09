@@ -39,6 +39,16 @@ class SFileManager(val user : String) {
         return false
 
     }
+    fun isSongAvailable(num:Int):Boolean{
+        val unlockedSongListFile = File(usrdir.absolutePath, "USL.xml")
+        return if(unlockedSongListFile.exists()) {
+            val soup = Jsoup.parse(unlockedSongListFile, "UTF-8")
+            val songs = soup.select("index")
+            songs.all { it.select("number").html().toInt()!=num }
+        }
+        else
+            true
+    }
 
 
     fun authenticate(passwd: String): Boolean{
@@ -83,10 +93,20 @@ class SFileManager(val user : String) {
 	            <number>$number</number>
 	            <artist>$artist</artist>
 	            <title>$title</title>
-	            <link>$link</link>
+	            <site>$link</site>
             </index>
         """.trimIndent()
         unlockedSongListFile.appendText(content)
+    }
+
+    fun removeFromUSL(song: Song){
+        val number = song.Number
+        val unlockedSongListFile = File(usrdir.absolutePath, "USL.xml")
+        val soup = Jsoup.parse(unlockedSongListFile, "UTF-8")
+        val indices = soup.select("index")
+        indices.filter { it.select("number").html()==number }.forEach { it.remove() }
+
+        unlockedSongListFile.writeText(soup.body().html())
     }
 
 
@@ -119,7 +139,7 @@ class SFileManager(val user : String) {
         val number = song.select("number").html()
         val artist = song.select("artist").html()
         val title = song.select("title").html()
-        val link = song.select("link").html()
+        val link = song.select("site").html()
         return Song(number, artist, title, link)
     }
 

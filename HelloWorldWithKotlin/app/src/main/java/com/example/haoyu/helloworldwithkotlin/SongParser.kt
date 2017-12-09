@@ -70,7 +70,7 @@ class SongParser(val index: Int, val version: Int){
         val songs = xml.select("Song")
         songs.forEach { song ->
             val number = song.select("Number").html()
-            val artist = song.select("Word").html()
+            val artist = song.select("Artist").html()
             val title = song.select("Title").html()
             val link = song.select("Link").html()
             songlist.add(Song(number, artist, title, link))

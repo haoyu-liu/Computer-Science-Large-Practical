@@ -1,7 +1,10 @@
 package com.example.haoyu.helloworldwithkotlin
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Environment
 import android.support.design.widget.NavigationView
@@ -18,8 +21,9 @@ import android.view.MenuItem
 import com.ogaclejapan.smarttablayout.SmartTabLayout
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems
-import org.jetbrains.anko.find
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.*
+import org.jetbrains.anko.design.longSnackbar
+import org.jetbrains.anko.design.snackbar
 import org.jsoup.Jsoup
 import java.io.File
 
@@ -30,6 +34,9 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private var recyclerview : RecyclerView?=null
     private var user :String?=null
 
+    private var networkChangeReceiver: NetworkChangeReceiver?=null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
@@ -37,11 +44,6 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         setSupportActionBar(toolbar)
 
         val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
-/*        if(!pref.contains("username")){
-            val editor = pref.edit()
-            editor.putString("username", "admin")
-            editor.apply()
-        }*/
         if(!pref.contains("songNum"))
         {
             val editor = pref.edit()
@@ -69,6 +71,11 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         recyclerview!!.layoutManager=layoutmanager
 
 
+        //network monitoring
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE")
+        networkChangeReceiver =NetworkChangeReceiver()
+        registerReceiver(networkChangeReceiver, intentFilter)
 
         val drawer = find<DrawerLayout>(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(
@@ -79,22 +86,33 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val navigationView = findViewById(R.id.nav_view) as NavigationView
         navigationView.setNavigationItemSelectedListener(this)
 
-        val (current, newest)=checkUpdate()
-        if(current<newest)
-        {
-            val intent = Intent(this, UpdateSongActivity::class.java)
-            intent.putExtra("current", current)
-            intent.putExtra("newest", newest)
-            startActivity(intent)
-        }
+
     }
 
     override fun onResume() {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+        if(networkInfo==null || !networkInfo.isAvailable){
+            alert("Please turn on Internet service and try again", "No Network Connection") {
+                yesButton {}
+                noButton {}
+            }.show()
+        }else {
+            val (current, newest) = checkUpdate()
+            if (current < newest) {
+                startActivity<UpdateSongActivity>("current" to current, "newest" to newest)
+            }
+        }
 
         timelineitemlist = SFileManager(user!!).getTI()
         val timelineAdapter = TimelineAdapter(timelineitemlist)
         recyclerview!!.adapter = timelineAdapter
         super.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(networkChangeReceiver)
     }
 
 
@@ -132,25 +150,28 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val id = item.itemId
 
         if (id == R.id.nav_sync) {
-            val (current, newest)=checkUpdate()
-            if(current<newest)
-            {
-                val intent = Intent(this, UpdateSongActivity::class.java)
-                intent.putExtra("current", current)
-                intent.putExtra("newest", newest)
-                startActivity(intent)
+            val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val networkInfo = connectivityManager.activeNetworkInfo
+            if(networkInfo==null || !networkInfo.isAvailable){
+                alert("Please turn on Internet service and try again", "No Network Connection") {
+                    yesButton {}
+                    noButton {}
+                }.show()
             }
-            else{
-                toast("no new update")
+            else {
+                val (current, newest) = checkUpdate()
+                if (current < newest) {
+                    startActivity<UpdateSongActivity>("current" to current, "newest" to newest)
+                } else {
+                    snackbar(find<RecyclerView>(R.id.recycler_view_timeline), "no new update")
+                }
             }
         }
         else if (id == R.id.nav_gallery) {
-//            val intent = Intent(this, MapsActivity::class.java)
-//            startActivity(intent)
+
         }
         else if (id == R.id.nav_unlockedsong) {
-            val intent = Intent(this, UnlockedSongActivity::class.java)
-            startActivity(intent)
+            startActivity<UnlockedSongActivity>()
         }
         else if (id == R.id.nav_manage) {
 
@@ -160,9 +181,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         }
         else if (id == R.id.nav_send) {
             SPrivilege(this).updateUser("null")
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-
+            startActivity<MainActivity>()
         }
 
         val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
@@ -193,5 +212,15 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         if(!songlistDir.exists()||songlistDir.list().size != current)
             current=0
         return (arrayListOf(current, a))
+    }
+
+    private inner class NetworkChangeReceiver: BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val connectivityManager = context!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val networkInfo = connectivityManager.activeNetworkInfo
+            if(networkInfo==null || !networkInfo.isAvailable){
+                longSnackbar(find<RecyclerView>(R.id.recycler_view_timeline), "network unavailable, please check your network")
+            }
+        }
     }
 }

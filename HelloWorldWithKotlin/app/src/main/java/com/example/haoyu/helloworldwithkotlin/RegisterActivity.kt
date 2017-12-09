@@ -10,14 +10,19 @@ import android.view.ViewAnimationUtils
 import android.view.animation.AccelerateInterpolator
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Build
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.ActivityOptionsCompat
 import android.transition.Explode
 import android.widget.Button
 import android.widget.EditText
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.find
+import org.jetbrains.anko.noButton
+import org.jetbrains.anko.yesButton
 
 class RegisterActivity : AppCompatActivity(), View.OnClickListener{
 
@@ -52,23 +57,34 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
         when(v!!.id){
             R.id.fab -> animateRevealClose()
             R.id.bt_reg_go -> {
-                val username = etUsername!!.text.toString()
-                val password = etPassword!!.text.toString()
-                val reapeatPassword = etRepeatPassword!!.text.toString()
-                val sfileManager = SFileManager(username)
 
-                if(password==reapeatPassword && (!sfileManager.isUserExists())) {
-                    sfileManager.createUser(password)
-                    SPrivilege(this).updateUser(username)
+                val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val networkInfo = connectivityManager.activeNetworkInfo
+                if(networkInfo==null || !networkInfo.isAvailable){
+                    alert("Please turn on Internet service and try again", "No Network Connection") {
+                        yesButton {}
+                        noButton {}
+                    }.show()
+                }
+                else {
+                    val username = etUsername!!.text.toString()
+                    val password = etPassword!!.text.toString()
+                    val reapeatPassword = etRepeatPassword!!.text.toString()
+                    val sfileManager = SFileManager(username)
 
-                    //animation
-                    val explode = Explode()
-                    explode.duration = 500
-                    window.exitTransition = explode
-                    window.enterTransition = explode
-                    val oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
-                    val i2 = Intent(this, Main2Activity::class.java)
-                    startActivity(i2, oc2.toBundle())
+                    if (password == reapeatPassword && (!sfileManager.isUserExists())) {
+                        sfileManager.createUser(password)
+                        SPrivilege(this).updateUser(username)
+
+                        //animation
+                        val explode = Explode()
+                        explode.duration = 500
+                        window.exitTransition = explode
+                        window.enterTransition = explode
+                        val oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
+                        val i2 = Intent(this, Main2Activity::class.java)
+                        startActivity(i2, oc2.toBundle())
+                    }
                 }
             }
         }

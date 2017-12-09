@@ -20,7 +20,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.find
+import org.jetbrains.anko.noButton
+import org.jetbrains.anko.yesButton
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -60,18 +63,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
             R.id.bt_go -> {
-                val username = etUsername!!.text.toString()
-                val password = etPassword!!.text.toString()
-                val sfileManager = SFileManager(username)
-                if(sfileManager.authenticate(password)) {
-                    SPrivilege(this).updateUser(username)
-                    val explode = Explode()
-                    explode.duration = 500
-                    window.exitTransition = explode
-                    window.enterTransition = explode
-                    val oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
-                    val i2 = Intent(this, Main2Activity::class.java)
-                    startActivity(i2, oc2.toBundle())
+                val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val networkInfo = connectivityManager.activeNetworkInfo
+                if(networkInfo==null || !networkInfo.isAvailable){
+                    alert("Please turn on Internet service and try again", "No Network Connection") {
+                        yesButton {}
+                        noButton {}
+                    }.show()
+                }
+                else {
+                    val username = etUsername!!.text.toString()
+                    val password = etPassword!!.text.toString()
+                    val sfileManager = SFileManager(username)
+                    if (sfileManager.authenticate(password)) {
+                        SPrivilege(this).updateUser(username)
+                        val explode = Explode()
+                        explode.duration = 500
+                        window.exitTransition = explode
+                        window.enterTransition = explode
+                        val oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
+                        val i2 = Intent(this, Main2Activity::class.java)
+                        startActivity(i2, oc2.toBundle())
+                    }
                 }
             }
         }
@@ -104,15 +117,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())||
                     Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())
 
-    private inner class NetworkReceiver: BroadcastReceiver(){
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val connectivityManager = context!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val networkInfo = connectivityManager.activeNetworkInfo
-            if(!networkInfo.isAvailable){
-                Toast.makeText(context, "network unavailable", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
+
 
 
 }
