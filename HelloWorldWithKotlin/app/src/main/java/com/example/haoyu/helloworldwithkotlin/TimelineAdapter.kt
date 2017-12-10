@@ -1,15 +1,13 @@
 package com.example.haoyu.helloworldwithkotlin
 
-import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import org.jetbrains.anko.find
-import android.util.TypedValue
-
 
 
 /**
@@ -20,13 +18,15 @@ class TimelineAdapter(private val timelineItemList: List<TimelineItem>) : Recycl
 
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
-        val cdSuccess=view.find<CardView>(R.id.success_cardview)
-        val cvFail=view.find<CardView>(R.id.fail_cardview)
+        val cvSuccess =view.find<RelativeLayout>(R.id.success_cardview)
+        val cvFail=view.find<RelativeLayout>(R.id.fail_cardview)
         val tvSongName=view.find<TextView>(R.id.textview_songname)
         val tvSuccessTime=view.find<TextView>(R.id.textview_success_time)
         val tvFailTime=view.find<TextView>(R.id.textview_fail_time)
         val ivResultIcon=view.find<ImageView>(R.id.result_image)
         val tvSongNameFail=view.find<TextView>(R.id.textview_songname_fail)
+        val tvUnlock=view.find<TextView>(R.id.textview_unlock)
+        val tvFail=view.find<TextView>(R.id.textview_fail)
 
     }
 
@@ -38,14 +38,23 @@ class TimelineAdapter(private val timelineItemList: List<TimelineItem>) : Recycl
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val timelineItem = timelineItemList.get(position)
         if(timelineItem.result=="1"){
-            holder.cvFail.visibility=View.INVISIBLE
+            //holder.cvFail.visibility=View.INVISIBLE
+            holder.tvUnlock.text="Unlock"
             holder.tvSongName.text = timelineItem.song
             holder.tvSuccessTime.text = timelineItem.time
+            holder.ivResultIcon.setImageResource(R.mipmap.success_icon)
+            holder.tvFail.text=""
+            holder.tvSongNameFail.text=""
+            holder.tvFailTime.text = ""
         }else if(timelineItem.result=="0"){
-            holder.cdSuccess.visibility=View.INVISIBLE
+            //holder.cvSuccess.visibility=View.INVISIBLE
+            holder.tvFail.text="Fail"
             holder.tvSongNameFail.text=timelineItem.song
             holder.tvFailTime.text = timelineItem.time
             holder.ivResultIcon.setImageResource(R.mipmap.fail_icon)
+            holder.tvUnlock.text=""
+            holder.tvSongName.text = ""
+            holder.tvSuccessTime.text = ""
         }
     }
 

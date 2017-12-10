@@ -167,9 +167,6 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
         }
-        else if (id == R.id.nav_gallery) {
-
-        }
         else if (id == R.id.nav_unlockedsong) {
             startActivity<UnlockedSongActivity>()
         }

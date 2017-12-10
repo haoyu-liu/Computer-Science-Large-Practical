@@ -10,6 +10,7 @@
         android:id="@+id/item_word"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="20dp"
+        android:fontFamily="casual"
         tools:text="Word"/>
 <!--    <TextView
         android:layout_width="match_parent"
