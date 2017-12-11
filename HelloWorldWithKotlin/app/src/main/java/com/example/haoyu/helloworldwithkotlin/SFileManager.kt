@@ -29,11 +29,11 @@ class SFileManager(val user : String) {
         return passwdFile.readLines().any { it.contains(user) }
     }
 
-    fun createUser(passwd: String): Boolean{
+    fun createUser(email:String, passwd: String): Boolean{
         if(!usrdir.exists()) {
             usrdir.mkdirs()
             val passwdFile = File(root, "passwd.txt")
-            passwdFile.appendText("$user $passwd")
+            passwdFile.appendText("$user $email $passwd\n")
             return true
         }
         return false
@@ -56,12 +56,52 @@ class SFileManager(val user : String) {
         if(!passwdFile.exists())
             return false
         for(line in passwdFile.readLines()){
-            val(__user, __passwd) = line.split(" ")
+            val(__user, __email, __passwd) = line.split(" ")
             if(user == __user && passwd ==__passwd)
                 return true
         }
         return false
     }
+    fun isProfileExists(f:File):Boolean=f.readLines().any { it.contains(user) }
+
+
+    fun updateProfile(path :String){
+        val profileFile = File(root, "profile.txt")
+        if(!profileFile.exists() || !isProfileExists(profileFile))
+            profileFile.appendText("$user $path\n")
+        else{
+            val tempFile = File(root, "temp.file")
+            profileFile.forEachLine { line ->
+                if(!line.contains(user))
+                    tempFile.appendText(line)
+                else
+                    tempFile.appendText("$user $path\n")
+            }
+            profileFile.delete()
+            tempFile.renameTo(File(root, "profile.txt"))
+        }
+    }
+    fun getProfilePath():String{
+        val profileFile = File(root, "profile.txt")
+        if(profileFile.exists()) {
+            for (line in profileFile.readLines())
+                if (line.contains(user)) {
+                    val (_, path) = line.split(" ")
+                    return path
+                }
+        }
+        return ""
+    }
+    fun getEmail():String{
+        val passwdFile = File(root, "passwd.txt")
+        for(line in passwdFile.readLines()){
+            val(__user, email, _) = line.split(" ")
+            if(user == __user)
+                return email
+        }
+        return "s1783038@ed.ac.uk"
+    }
+
 
 
     fun updateTI(timelineItem: TimelineItem){
@@ -98,6 +138,7 @@ class SFileManager(val user : String) {
         """.trimIndent()
         unlockedSongListFile.appendText(content)
     }
+
 
     fun removeFromUSL(song: Song){
         val number = song.Number

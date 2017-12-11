@@ -30,8 +30,8 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
     private var cvAdd: CardView? = null
     private var btRegGo: Button?=null
     private var etUsername: EditText?=null
-    private var etPassword: EditText?=null
-    private var etRepeatPassword:EditText?=null
+    private var etEmail: EditText?=null
+    private var etPassword:EditText?=null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,8 +42,8 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
         cvAdd = find(R.id.cv_add)
         btRegGo = find(R.id.bt_reg_go)
         etUsername = find(R.id.et_username)
+        etEmail = find(R.id.et_email)
         etPassword = find(R.id.et_password)
-        etRepeatPassword = find(R.id.et_repeatpassword)
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -68,12 +68,12 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
                 }
                 else {
                     val username = etUsername!!.text.toString()
+                    val email = etEmail!!.text.toString()
                     val password = etPassword!!.text.toString()
-                    val reapeatPassword = etRepeatPassword!!.text.toString()
                     val sfileManager = SFileManager(username)
 
-                    if (password == reapeatPassword && (!sfileManager.isUserExists())) {
-                        sfileManager.createUser(password)
+                    if (!sfileManager.isUserExists()) {
+                        sfileManager.createUser(email, password)
                         SPrivilege(this).updateUser(username)
 
                         //animation

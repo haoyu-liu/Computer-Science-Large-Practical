@@ -13,11 +13,11 @@ import android.os.CountDownTimer
 import android.os.Environment
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
-import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.util.Log.d
 import android.view.View
 import android.widget.*
 import com.google.android.gms.common.ConnectionResult
@@ -31,11 +31,11 @@ import com.premnirmal.Magnet.IconCallback
 import com.premnirmal.Magnet.Magnet
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.longSnackbar
-import org.jetbrains.anko.design.snackbar
 import java.io.File
 import java.text.DateFormat
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.collections.RandomAccess
 
 
 class MapsActivity : FragmentActivity(), OnMapReadyCallback,
@@ -58,6 +58,9 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     private var user :String?=null
     private var usrdirpath: String?=null
     private var sfileManager :SFileManager?=null
+    private var countdownTimer:ChallengeTimer?=null
+    private var state = 0
+    private var secondsLeft=0L
     private val markersHashMap = hashMapOf<Marker, marker>()
     private val markersObj = mutableListOf<Marker>()
     private val obtained_interestingword = mutableListOf<Word>()
@@ -65,7 +68,6 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     private val obtained_boringword = mutableListOf<Word>()
     private val obtained_notboringword = mutableListOf<Word>()
     private val obtained_unclassifiedword = mutableListOf<Word>()
-    private var state = 0
 
 
 
@@ -168,7 +170,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
 
 
                 if(mode=="Challenge")
-                    startTimer(60000*6, 1000)
+                    startTimer(60000*3, 1000)
                 if(mode=="Casual")
                     countdowntTextView!!.text = "drag up to review gained markers"
             }
@@ -206,22 +208,20 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         }
     }
 
-
     private fun startTimer(duration: Long, interval: Long){
-        val countdowntimer = object: CountDownTimer(duration, interval){
-            override fun onFinish() {
-                onBackPressed()
-            }
+        countdownTimer = ChallengeTimer(duration, interval)
+        countdownTimer!!.start()
+    }
 
-            override fun onTick(millisUntilFinished: Long) {
-                var secondsLeft = millisUntilFinished / 1000
-                val minutesLeft = secondsLeft / 60
-                secondsLeft -= minutesLeft * 60
-                countdowntTextView!!.text = minutesLeft.toString()+" : "+secondsLeft.toString()
-            }
-
-        }
-        countdowntimer.start()
+    private fun addBonusMarker(){
+        val latitude = Random().nextDouble()*(55.946233-55.942617)+55.942617
+        val longitude = Random().nextDouble()*(-3.184319+3.192473)-3.192473
+        d("bonus marker","$latitude, $longitude")
+        mMap!!.addMarker(MarkerOptions()
+                .position(LatLng(latitude, longitude))
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.bonus)))
+        longSnackbar(recyclerview!!, "Bonus marker appears")
+        mMap!!.setOnMarkerClickListener(this)
     }
 
     override fun onClick(v: View?) {
@@ -242,7 +242,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         markerLocation.latitude = p0!!.position.latitude
         markerLocation.longitude = p0.position.longitude
         val distance = markerLocation.distanceTo(mLastLocation)
-        if(distance<15){
+        if(distance<15 && p0 in markersHashMap){
             val word = lyricHashMap!![markersHashMap[p0]!!.name]
             val style = markersHashMap[p0]!!.style
             Log.d("collect marker", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>$word")
@@ -258,9 +258,13 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             toast("obtained word: $word")
             p0.remove()
         }
-        else{
-            toast("get closer!!")
+        else if(distance<15 && p0 !in markersHashMap){
+            countdownTimer!!.cancel()
+            val i = Random().nextInt(30)
+            startTimer((secondsLeft+i)*1000, 1000)
         }
+        else
+            toast("get closer!")
         return true
     }
 
@@ -405,6 +409,22 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
                 longSnackbar(find<RecyclerView>(R.id.countdown_text), "network unavailable, please check your network")
             }
         }
+    }
+
+    private inner class ChallengeTimer(duration: Long, interval: Long) : CountDownTimer(duration, interval) {
+        override fun onFinish() {
+            onBackPressed()
+        }
+
+        override fun onTick(millisUntilFinished: Long) {
+            secondsLeft = millisUntilFinished / 1000
+            val minutesLeft = secondsLeft / 60
+            secondsLeft -= minutesLeft * 60
+            if(secondsLeft%30==0L /*&& Random().nextDouble()<0.25*/)
+                addBonusMarker()
+            countdowntTextView!!.text = minutesLeft.toString()+" : "+secondsLeft.toString()
+        }
+
     }
 }
 

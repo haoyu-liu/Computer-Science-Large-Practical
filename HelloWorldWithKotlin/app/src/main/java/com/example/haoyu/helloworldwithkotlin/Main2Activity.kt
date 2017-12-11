@@ -1,12 +1,16 @@
 package com.example.haoyu.helloworldwithkotlin
 
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.Cursor
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
@@ -18,12 +22,15 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import com.ogaclejapan.smarttablayout.SmartTabLayout
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems
+import de.hdodenhof.circleimageview.CircleImageView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.longSnackbar
 import org.jetbrains.anko.design.snackbar
+import org.jetbrains.anko.support.v4.find
 import org.jsoup.Jsoup
 import java.io.File
 
@@ -33,7 +40,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private var timelineitemlist = ArrayList<TimelineItem>()
     private var recyclerview : RecyclerView?=null
     private var user :String?=null
-
+    //private var imageView: CircleImageView?=null
     private var networkChangeReceiver: NetworkChangeReceiver?=null
 
 
@@ -64,6 +71,8 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         viewPagerTab.setViewPager(mPager)
         mPager!!.currentItem=1
 
+        //imageView =findViewById(R.id.profile_image_nav) as CircleImageView
+
 
         //initTimelineItems()
         recyclerview = find(R.id.recycler_view_timeline)
@@ -84,12 +93,20 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
 
         val navigationView = findViewById(R.id.nav_view) as NavigationView
+        val headView = navigationView.getHeaderView(0)
+        SPrivilege(this).updateProfileInfo(headView)
         navigationView.setNavigationItemSelectedListener(this)
 
 
     }
 
     override fun onResume() {
+/*        val imagepath = SFileManager(user!!).getProfilePath()
+        if(imagepath!="")
+        {
+            val uri = Uri.parse(imagepath)
+            imageView!!.setImageURI(uri)
+        }*/
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo = connectivityManager.activeNetworkInfo
         if(networkInfo==null || !networkInfo.isAvailable){
@@ -123,7 +140,6 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             mPager!!.currentItem!=0 -> mPager!!.currentItem = mPager!!.currentItem-1
             else -> super.onBackPressed()
         }
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -137,8 +153,6 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
-
-
         return if (id == R.id.action_settings) {
             true
         } else super.onOptionsItemSelected(item)
@@ -167,14 +181,14 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 }
             }
         }
-        else if (id == R.id.nav_gallery) {
-
-        }
         else if (id == R.id.nav_unlockedsong) {
             startActivity<UnlockedSongActivity>()
         }
         else if (id == R.id.nav_manage) {
-
+            val intentFromGallery = Intent()
+            intentFromGallery.type = "image/*";
+            intentFromGallery.action = Intent.ACTION_GET_CONTENT;
+            startActivityForResult(intentFromGallery, 6666)
         }
         else if (id == R.id.nav_share) {
 
@@ -213,6 +227,20 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             current=0
         return (arrayListOf(current, a))
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+
+        if (resultCode == Activity.RESULT_CANCELED) {
+            snackbar(find<RecyclerView>(R.id.recycler_view_timeline), "no image selected")
+            return
+        }
+        val uri = intent!!.data
+        SFileManager(user!!).updateProfile(uri.path)
+        super.onActivityResult(requestCode, resultCode, intent)
+    }
+
+
+
 
     private inner class NetworkChangeReceiver: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
