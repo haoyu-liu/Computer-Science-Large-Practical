@@ -6,6 +6,7 @@
             android:id="@+id/nav_sync"
             android:icon="@mipmap/sync"
             android:title="Sync" />
+
         <item
             android:id="@+id/nav_unlockedsong"
             android:icon="@drawable/ic_menu_unlockedsong"

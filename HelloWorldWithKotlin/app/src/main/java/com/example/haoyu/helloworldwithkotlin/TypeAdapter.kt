@@ -28,8 +28,8 @@ class TypeAdapter(groups: List<ExpandableGroup<*>>) : ExpandableRecyclerViewAdap
     override fun onBindChildViewHolder(holder: WordViewHolder, flatPosition: Int,
                                        group: ExpandableGroup<*>, childIndex: Int) {
 
-        val artist = (group as Type).items[childIndex]
-        holder.setWord(artist.name!!)
+        val type = (group as Type).items[childIndex]
+        holder.setWord(type.name!!)
     }
 
     override fun onBindGroupViewHolder(holder: TypeViewHolder?, flatPosition: Int, group: ExpandableGroup<*>?) {
