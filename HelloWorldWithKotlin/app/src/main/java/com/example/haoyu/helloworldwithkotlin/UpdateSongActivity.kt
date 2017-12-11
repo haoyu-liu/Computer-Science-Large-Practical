@@ -55,21 +55,19 @@ class UpdateSongActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-
         if(isExternalStorageWritable()) {
             try {
                 progressbar!!.max = 100
-                DownloadTask(progressbar!!, textview!!, current, newest).execute(100)
-                snackbar(find(R.id.progressBar1), "success!")
+                DownloadTask(this, progressbar!!, textview!!, current, newest).execute(100)
                 val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
                 val editor = pref.edit()
                 editor.putInt("songNum", newest)
                 editor.apply()
             } catch (e: IOException) {
-                toast("download failed")
+                snackbar(find(R.id.progressBar1), "download failed")
             }
         }else
-            toast("unreadable")
+            snackbar(find(R.id.progressBar1), "try again.")
     }
 
     override fun onDestroy() {

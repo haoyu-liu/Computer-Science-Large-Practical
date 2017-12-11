@@ -1,7 +1,6 @@
 package com.example.haoyu.helloworldwithkotlin
 
 import android.app.ActivityOptions
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,18 +11,13 @@ import android.os.Bundle
 import android.os.Environment
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.ActivityCompat
-import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.CardView
-import android.transition.Explode
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.find
-import org.jetbrains.anko.noButton
-import org.jetbrains.anko.yesButton
+import org.jetbrains.anko.*
+import top.wefor.circularanim.CircularAnim
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -77,13 +71,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     val sfileManager = SFileManager(username)
                     if (sfileManager.authenticate(password)) {
                         SPrivilege(this).updateUser(username)
-                        val explode = Explode()
-                        explode.duration = 500
-                        window.exitTransition = explode
-                        window.enterTransition = explode
-                        val oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
-                        val i2 = Intent(this, Main2Activity::class.java)
-                        startActivity(i2, oc2.toBundle())
+                        CircularAnim.fullActivity(this, view)
+                                .colorOrImageRes(R.color.bg)
+                                .go { startActivity<Main2Activity>() }
+                    }else{
+                        toast("incorrect username or password")
                     }
                 }
             }

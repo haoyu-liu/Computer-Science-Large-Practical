@@ -23,6 +23,7 @@
         android:label="Songle"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        tool:replace="android:label"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
             android:name=".MainActivity"

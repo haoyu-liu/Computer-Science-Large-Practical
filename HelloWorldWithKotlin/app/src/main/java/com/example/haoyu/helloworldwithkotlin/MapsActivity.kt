@@ -35,8 +35,6 @@ import java.io.File
 import java.text.DateFormat
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.collections.RandomAccess
-
 
 class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -59,6 +57,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     private var usrdirpath: String?=null
     private var sfileManager :SFileManager?=null
     private var countdownTimer:ChallengeTimer?=null
+    private var degree:String?=null
     private var state = 0
     private var secondsLeft=0L
     private val markersHashMap = hashMapOf<Marker, marker>()
@@ -68,8 +67,6 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     private val obtained_boringword = mutableListOf<Word>()
     private val obtained_notboringword = mutableListOf<Word>()
     private val obtained_unclassifiedword = mutableListOf<Word>()
-
-
 
 
 
@@ -114,7 +111,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         //values from previous activity
         val intent = intent
         val mode = intent.getStringExtra("mode")
-        val degree = intent.getStringExtra("degree")
+        degree = intent.getStringExtra("degree")
 
         //init SFileManager
         val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
@@ -125,10 +122,10 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         //init SongParser
         val songNum =pref.getInt("songNum", 1)
         val randNum = (1..songNum).random()
-        if(degree == "Hard")
-            songParser = SongParser(randNum, 4)
+        songParser = if(degree == "Hard")
+            SongParser(randNum, 4)
         else
-            songParser = SongParser(randNum, 5)
+            SongParser(randNum, 5)
 
         song = songParser!!.song
         Log.d("tvSongName>>>>>>>", "${song!!.Title}")
@@ -140,7 +137,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             if(count==0) {
                 count++
                 state = 1
-                val markersInMapList = markerGenerator(songParser!!.loadMarkerList(), degree)
+                val markersInMapList = markerGenerator(songParser!!.loadMarkerList(), degree!!)
                 markersInMapList.forEach { v ->
                     val markerObj = mMap!!.addMarker(MarkerOptions()
                             .position(LatLng(v.latitude.toDouble(), v.longitude.toDouble())))
@@ -225,16 +222,18 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     }
 
     override fun onClick(v: View?) {
+        d("btnid", "${v!!.id} ${R.id.confirm_button}")
         when(v!!.id){
             R.id.confirm_button ->{
                 val editText = find<EditText>(R.id.answer_edittext)
                 if(editText.text.toString() == song!!.Title){
                     onSuccess()
-                    finish()
                 }
             }
         }
     }
+
+
 
     override fun onMarkerClick(p0: Marker?): Boolean {
 
@@ -260,8 +259,14 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         }
         else if(distance<15 && p0 !in markersHashMap){
             countdownTimer!!.cancel()
-            val i = Random().nextInt(30)
+            val i = when(degree){
+                "Easy" -> Random().nextInt(30)+30
+                "Moderate" -> Random().nextInt(40)+20
+                else -> Random().nextInt(50)+10
+            }
+            d("time added", "$i")
             startTimer((secondsLeft+i)*1000, 1000)
+            p0.remove()
         }
         else
             toast("get closer!")
@@ -269,11 +274,26 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     }
 
     private fun onFail(){
-        val time = DateFormat.getDateTimeInstance().format(Date())
-        val result = "0"
-        val song = this.song!!.Title
-        sfileManager!!.updateTI(TimelineItem(time, result, song))
-        magnet!!.destroy()
+
+        alert("This challenge failed. Try again!", "Challenge Failed") {
+            yesButton {
+                val time = DateFormat.getDateTimeInstance().format(Date())
+                val result = "0"
+                val song = song!!.Title
+                sfileManager!!.updateTI(TimelineItem(time, result, song))
+                magnet!!.destroy()
+            }
+            noButton {
+                if (secondsLeft <= 1L) {
+                    val time = DateFormat.getDateTimeInstance().format(Date())
+                    val result = "0"
+                    val song = song!!.Title
+                    sfileManager!!.updateTI(TimelineItem(time, result, song))
+                    magnet!!.destroy()
+                }
+            }
+        }.show().setCancelable(false)
+
 
     }
 
@@ -283,7 +303,11 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         val name = this.song!!.Title
         sfileManager!!.updateTI(TimelineItem(time, result, name))
         sfileManager!!.updateUSL(this.song!!)
-        magnet!!.destroy()
+        alert("This challenge succeeded. Congrats", "Challenge Successful") {
+            yesButton {magnet!!.destroy()}
+            noButton {magnet!!.destroy()}
+        }.show().setCancelable(false)
+
 
     }
 
@@ -299,7 +323,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     }
 
     override fun onIconDestroyed() {
-        this.finish()
+        finish()
     }
 
     override fun onIconClick(p0: View?, p1: Float, p2: Float) {
@@ -420,11 +444,11 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             secondsLeft = millisUntilFinished / 1000
             val minutesLeft = secondsLeft / 60
             secondsLeft -= minutesLeft * 60
-            if(secondsLeft%30==0L /*&& Random().nextDouble()<0.25*/)
+            countdowntTextView!!.text = "$minutesLeft : $secondsLeft"
+            secondsLeft += minutesLeft * 60
+            if (secondsLeft % 30 == 0L && Random().nextDouble() < 0.25)
                 addBonusMarker()
-            countdowntTextView!!.text = minutesLeft.toString()+" : "+secondsLeft.toString()
         }
-
     }
 }
 

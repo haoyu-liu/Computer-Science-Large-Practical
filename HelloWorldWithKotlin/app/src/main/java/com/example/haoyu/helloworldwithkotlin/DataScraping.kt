@@ -4,6 +4,7 @@ package com.example.haoyu.helloworldwithkotlin
  * Created by HAOYU on 2017/10/25.
  */
 
+import android.app.Activity
 import android.os.AsyncTask
 import android.os.Environment
 import android.util.Log
@@ -15,9 +16,10 @@ import org.jsoup.Jsoup
 import java.io.File
 import java.io.IOException
 import java.net.URL
+import org.jetbrains.anko.*
 
 
-class DownloadTask(val progressbar: ProgressBar, val textview:TextView, val current:Int, val newest:Int): AsyncTask<Int, Double, Int>() {
+class DownloadTask(val activity : Activity,val progressbar: ProgressBar, val textview:TextView, val current:Int, val newest:Int): AsyncTask<Int, Double, Int>() {
 
     private val root = Environment.getExternalStorageDirectory()
 
@@ -73,7 +75,7 @@ class DownloadTask(val progressbar: ProgressBar, val textview:TextView, val curr
         //progressbar.visibility = View.GONE
         progressbar.progress = 100
         textview.text="complete!"
-
+        activity.finish()
     }
 }
 

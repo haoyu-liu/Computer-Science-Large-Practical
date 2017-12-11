@@ -19,10 +19,8 @@ import android.support.v4.app.ActivityOptionsCompat
 import android.transition.Explode
 import android.widget.Button
 import android.widget.EditText
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.find
-import org.jetbrains.anko.noButton
-import org.jetbrains.anko.yesButton
+import org.jetbrains.anko.*
+import top.wefor.circularanim.CircularAnim
 
 class RegisterActivity : AppCompatActivity(), View.OnClickListener{
 
@@ -70,21 +68,23 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
                     val username = etUsername!!.text.toString()
                     val email = etEmail!!.text.toString()
                     val password = etPassword!!.text.toString()
-                    val sfileManager = SFileManager(username)
+                    if(!username.contains(" ") && !email.contains(" ") && !password.contains(" ")) {
+                        val sfileManager = SFileManager(username)
 
-                    if (!sfileManager.isUserExists()) {
-                        sfileManager.createUser(email, password)
-                        SPrivilege(this).updateUser(username)
+                        if (!sfileManager.isUserExists()) {
+                            sfileManager.createUser(email, password)
+                            SPrivilege(this).updateUser(username)
 
-                        //animation
-                        val explode = Explode()
-                        explode.duration = 500
-                        window.exitTransition = explode
-                        window.enterTransition = explode
-                        val oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
-                        val i2 = Intent(this, Main2Activity::class.java)
-                        startActivity(i2, oc2.toBundle())
-                    }
+                            //animation
+                            CircularAnim.fullActivity(this, v)
+                                    .colorOrImageRes(R.color.even_dark)
+                                    .go { startActivity<Main2Activity>() }
+                        } else
+                          toast("username existed.")
+
+                    } else
+                        toast("input cannot contain space.")
+
                 }
             }
         }

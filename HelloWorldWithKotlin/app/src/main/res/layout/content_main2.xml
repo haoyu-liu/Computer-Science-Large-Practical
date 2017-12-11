@@ -37,25 +37,27 @@
         android:layout_height="match_parent"
         android:id="@+id/recycler_view_timeline"
         android:layout_below="@+id/pager"/>
-<!--    <include layout="@layout/layout_profile_fragment"/>-->
 
-<!--    <ProgressBar
-        android:id="@+id/progressBar1"
-        style="@android:style/Widget.Material.Light.ProgressBar.Horizontal"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:indeterminate="false"
-        android:max="100"
-        android:theme="@style/LinearProgress"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp" />-->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/pager"
+            android:id="@+id/textview_cc"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:fontFamily="casual"
+            android:textSize="18sp"
+            android:text="No play records yet."/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textview_dd"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/textview_cc"
+            android:fontFamily="casual"
+            android:textSize="18sp"
+            android:text="Let's have a game."/>
+
 
 </RelativeLayout>

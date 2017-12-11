@@ -5,16 +5,17 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.database.Cursor
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
 import android.support.design.widget.NavigationView
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
+import android.support.v4.widget.TextViewCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -22,15 +23,14 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
+import android.view.View
+import android.widget.TextView
 import com.ogaclejapan.smarttablayout.SmartTabLayout
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems
-import de.hdodenhof.circleimageview.CircleImageView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.longSnackbar
 import org.jetbrains.anko.design.snackbar
-import org.jetbrains.anko.support.v4.find
 import org.jsoup.Jsoup
 import java.io.File
 
@@ -40,7 +40,8 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private var timelineitemlist = ArrayList<TimelineItem>()
     private var recyclerview : RecyclerView?=null
     private var user :String?=null
-    //private var imageView: CircleImageView?=null
+    private var tv1:TextView?=null
+    private var tv2:TextView?=null
     private var networkChangeReceiver: NetworkChangeReceiver?=null
 
 
@@ -76,6 +77,8 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         //initTimelineItems()
         recyclerview = find(R.id.recycler_view_timeline)
+        tv1 = find(R.id.textview_cc)
+        tv2 = find(R.id.textview_dd)
         val layoutmanager = LinearLayoutManager(this)
         recyclerview!!.layoutManager=layoutmanager
 
@@ -96,17 +99,11 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         val headView = navigationView.getHeaderView(0)
         SPrivilege(this).updateProfileInfo(headView)
         navigationView.setNavigationItemSelectedListener(this)
-
-
+        requestPermission()
     }
 
     override fun onResume() {
-/*        val imagepath = SFileManager(user!!).getProfilePath()
-        if(imagepath!="")
-        {
-            val uri = Uri.parse(imagepath)
-            imageView!!.setImageURI(uri)
-        }*/
+
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo = connectivityManager.activeNetworkInfo
         if(networkInfo==null || !networkInfo.isAvailable){
@@ -122,8 +119,15 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         }
 
         timelineitemlist = SFileManager(user!!).getTI()
+        if(timelineitemlist.size!=0) {
+            tv1!!.visibility= View.INVISIBLE
+            tv2!!.visibility=View.INVISIBLE
+        }
         val timelineAdapter = TimelineAdapter(timelineitemlist)
         recyclerview!!.adapter = timelineAdapter
+
+
+
         super.onResume()
     }
 
@@ -203,12 +207,6 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         return true
     }
 
-    fun isExternalStorageWritable():Boolean=
-            Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
-
-    fun isExternalStrorageReadable():Boolean =
-            Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())||
-                    Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())
 
     private fun checkUpdate():ArrayList<Int>{
         val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
@@ -226,6 +224,19 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         if(!songlistDir.exists()||songlistDir.list().size != current)
             current=0
         return (arrayListOf(current, a))
+    }
+
+    private fun requestPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
+        }
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+        }
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
