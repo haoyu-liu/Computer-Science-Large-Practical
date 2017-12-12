@@ -1,8 +1,6 @@
 package com.example.haoyu.helloworldwithkotlin
 
-/**
- * Created by HAOYU on 2017/10/25.
- */
+
 
 import android.app.Activity
 import android.os.AsyncTask
@@ -18,18 +16,35 @@ import java.io.IOException
 import java.net.URL
 import org.jetbrains.anko.*
 
-
+/**
+ * This class extends from AsyncTask and downloads new songs and lyrics on the server asynchronously
+ *
+ *
+ * @param activity the activity calling this class
+ * @param progressbar shows the progress of downloading
+ * @param textview shows the progress of downloading
+ * @param current the number of songs in local storage
+ * @param newest the number of songs on the server
+ *
+ *
+ */
 class DownloadTask(val activity : Activity,val progressbar: ProgressBar, val textview:TextView, val current:Int, val newest:Int): AsyncTask<Int, Double, Int>() {
 
     private val root = Environment.getExternalStorageDirectory()
 
     private val url = "http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/"
 
+    /**
+     * Format all Int numbers under 10 to the String with "0i" type
+     *
+     * @param i Int number
+     */
     private fun formatNum(i : Int): String =
             if(i<10)
                 "0"+i.toString()
             else
                 i.toString()
+
 
     override fun onPreExecute() {
         progressbar.visibility = View.VISIBLE
@@ -38,16 +53,12 @@ class DownloadTask(val activity : Activity,val progressbar: ProgressBar, val tex
     }
 
     override fun doInBackground(vararg params: Int?): Int {
-        val songlistUrl = url + "songs.xml"
-        val doc = Jsoup.connect(songlistUrl).get()
-        val songs = doc.select("Song > Number")
         if (current <= newest) {
             try {
+                // The directory for files to be downloaded
                 val songdir = File(root.absolutePath,  "songlist")
-                if (!songdir.exists()) {
-                    Log.d("Datascrap", "not exist")
-                    songdir.mkdir()
-                }
+
+                // Download the fourth and fifth version of maps not in local storage
                 for (i in current+1..newest) {
                     val map5url = url + formatNum(i) + "/" + "map5.kml"
                     val map4url = url +formatNum(i) +"/"+"map4.kml"
@@ -72,9 +83,10 @@ class DownloadTask(val activity : Activity,val progressbar: ProgressBar, val tex
     }
 
     override fun onPostExecute(result: Int?) {
-        //progressbar.visibility = View.GONE
         progressbar.progress = 100
         textview.text="complete!"
+
+        // Finish UpdateSongActivity and go back to Main2Activity
         activity.finish()
     }
 }

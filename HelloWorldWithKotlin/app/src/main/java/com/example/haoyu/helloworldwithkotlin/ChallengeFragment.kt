@@ -24,7 +24,8 @@ import org.jetbrains.anko.yesButton
 import top.wefor.circularanim.CircularAnim
 
 /**
- * Created by HAOYU on 2017/11/28.
+ * The fragment for the third page of the ViewPager in Main2Activity.
+ * It handles a spinner indicating the degree of difficulty and a button launching MapsActivity for Challenge mode
  */
 class ChallengeFragment: Fragment(), View.OnClickListener{
 
@@ -39,6 +40,7 @@ class ChallengeFragment: Fragment(), View.OnClickListener{
         btn = v.find(R.id.start_chalg_btn)
         btn!!.setOnClickListener(this)
 
+        // Initialize the spinner for choosing the degree of difficulty
         spinner_challenge = v.findViewById(R.id.challenge_spinner) as Spinner
         val spinnerAdapter = ArrayAdapter.createFromResource(this.activity, R.array.mode, R.layout.spinner_item)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -50,7 +52,8 @@ class ChallengeFragment: Fragment(), View.OnClickListener{
     override fun onClick(v: View?) {
         if(v!!.id == R.id.start_chalg_btn)
         {
-            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
+            if (!Settings.canDrawOverlays(context)) {
+                // Request overlay permission for profile bubble
                 alert("Please turn on Overlay permission in Settings", "Overlay permission required") {
                     yesButton {
                         val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
@@ -60,6 +63,7 @@ class ChallengeFragment: Fragment(), View.OnClickListener{
                 }.show()
 
             }else {
+                // Request network connection when it is unavailable
                 val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val networkInfo = connectivityManager.activeNetworkInfo
                 if (networkInfo == null || !networkInfo.isAvailable) {
@@ -68,6 +72,7 @@ class ChallengeFragment: Fragment(), View.OnClickListener{
                         noButton {}
                     }.show()
                 } else {
+                    // Launch MapsActivity
                     CircularAnim.fullActivity(activity, v)
                             .colorOrImageRes(R.color.lime)
                             .go { startActivity<MapsActivity>("mode" to "Challenge", "degree" to spinner_challenge!!.selectedItem.toString()) }

@@ -22,7 +22,8 @@ import org.jetbrains.anko.yesButton
 import top.wefor.circularanim.CircularAnim
 
 /**
- * Created by HAOYU on 2017/11/28.
+ * The fragment for the first page of the ViewPager in Main2Activity.
+ * It handles a spinner indicating the degree of difficulty and a button launching MapsActivity for Casual mode
  */
 class CasualFragment:Fragment(), View.OnClickListener{
 
@@ -37,6 +38,7 @@ class CasualFragment:Fragment(), View.OnClickListener{
         btn = v.find(R.id.start_casl_btn)
         btn!!.setOnClickListener(this)
 
+        // Initialize the spinner for choosing the degree of difficulty
         spinner_casual = v.findViewById(R.id.casual_spinner) as Spinner
         val spinnerAdapter = ArrayAdapter.createFromResource(this.activity, R.array.mode, R.layout.spinner_item)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -46,7 +48,8 @@ class CasualFragment:Fragment(), View.OnClickListener{
 
     override fun onClick(v: View?) {
         if(v!!.id == R.id.start_casl_btn) {
-            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
+            if (!Settings.canDrawOverlays(context)) {
+                // Request overlay permission for profile bubble
                 alert("Please turn on Overlay permission in Settings", "Overlay permission required") {
                     yesButton {
                         val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
@@ -55,6 +58,7 @@ class CasualFragment:Fragment(), View.OnClickListener{
                     noButton {}
                 }.show()
             }else {
+                // Request network connection when it is unavailable
                 val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val networkInfo = connectivityManager.activeNetworkInfo
                 if (networkInfo == null || !networkInfo.isAvailable) {
@@ -63,6 +67,7 @@ class CasualFragment:Fragment(), View.OnClickListener{
                         noButton {}
                     }.show()
                 } else {
+                    // Launch MapsActivity
                     CircularAnim.fullActivity(activity, v)
                             .colorOrImageRes(R.color.coolgrey)
                             .go { startActivity<MapsActivity>("mode" to "Casual", "degree" to spinner_casual!!.selectedItem.toString()) }

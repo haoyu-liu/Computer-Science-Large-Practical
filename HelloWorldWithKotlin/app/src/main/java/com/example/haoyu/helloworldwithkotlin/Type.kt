@@ -1,7 +1,7 @@
 package com.example.haoyu.helloworldwithkotlin
 
 /**
- * Created by HAOYU on 2017/11/8.
+ *  This class for each type of word, such as "very interesting", in Expandable RecyclerView
  */
 
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup

@@ -11,7 +11,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 
 /**
- * Created by HAOYU on 2017/11/28.
+ * The fragment for the second page of the ViewPager in Main2Activity.
+ * It displays user's information and image.
  */
 
 class ProfileFragment : Fragment() {

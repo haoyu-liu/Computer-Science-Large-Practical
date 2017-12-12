@@ -6,12 +6,16 @@ import android.widget.TextView
 import org.jetbrains.anko.find
 
 /**
- * Created by HAOYU on 2017/12/7.
+ * This class controls and updates the identity of player by changing
+ * "username" value in SharedPreference and profile information on Main2Activity when needed
+ *
+ * @param context current context for obtaining the instance of SharedPreferences
  */
 class SPrivilege(context: Context) {
 
     private val pref = context.getSharedPreferences("user", Context.MODE_PRIVATE)!!
     private val username = pref.getString("username", "null")
+
 
     fun isUserLogined():Boolean{
 
@@ -26,6 +30,9 @@ class SPrivilege(context: Context) {
         editor.apply()
     }
 
+    /**
+     * @param view the view where Name and Email need to be changed
+     */
     fun updateProfileInfo(view: View){
         val tvName = view.find<TextView>(R.id.profile_name)
         val tvEmail = view.find<TextView>(R.id.profile_email)

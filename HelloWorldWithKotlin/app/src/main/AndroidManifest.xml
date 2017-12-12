@@ -27,7 +27,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
             android:name=".MainActivity"
-            android:label=""
+            android:label="Songle"
             android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,7 +53,6 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Main2Activity"
-            android:label=""
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>

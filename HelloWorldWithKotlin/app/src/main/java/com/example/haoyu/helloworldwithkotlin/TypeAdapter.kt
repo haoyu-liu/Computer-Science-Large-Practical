@@ -8,7 +8,7 @@ import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
 
 /**
- * Created by HAOYU on 2017/11/8.
+ * The Adapter for Expandable RecyclerVIew in Bottom Sheet in MapsActivity
  */
 
 class TypeAdapter(groups: List<ExpandableGroup<*>>) : ExpandableRecyclerViewAdapter<TypeViewHolder, WordViewHolder>(groups) {

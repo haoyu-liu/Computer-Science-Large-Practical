@@ -32,16 +32,18 @@ class UpdateSongActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_update_song)
 
+        // Obtain values from previous activity
         val intent = intent
         current = intent.getIntExtra("current", 0)
         newest = intent.getIntExtra("newest", 0)
 
-        //network monitoring
+        // Network monitoring
         val intentFilter = IntentFilter()
         intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE")
         networkChangeReceiver =NetworkChangeReceiver()
         registerReceiver(networkChangeReceiver, intentFilter)
 
+        // Initialize widgets
         progressbar = find(R.id.progressBar1)
         textview=find(R.id.textview_progress)
         val myToolBar = find<Toolbar>(R.id.toolbar_updating_songs)
@@ -57,6 +59,7 @@ class UpdateSongActivity : AppCompatActivity() {
 
         if(isExternalStorageWritable()) {
             try {
+                // Start downloading
                 progressbar!!.max = 100
                 DownloadTask(this, progressbar!!, textview!!, current, newest).execute(100)
                 val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
@@ -76,10 +79,6 @@ class UpdateSongActivity : AppCompatActivity() {
     }
     private fun isExternalStorageWritable():Boolean=
             Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()
-
-    private fun isExternalStrorageReadable():Boolean =
-            Environment.MEDIA_MOUNTED == Environment.getExternalStorageState() ||
-                    Environment.MEDIA_MOUNTED_READ_ONLY == Environment.getExternalStorageState()
 
     private inner class NetworkChangeReceiver: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {

@@ -6,7 +6,11 @@ import org.jsoup.nodes.Element
 import java.io.File
 
 /**
- * Created by HAOYU on 2017/12/5.
+ * This class manages all files that used in the game, including KML files downloaded from the server,
+ * users' information and password and the Unlocked Song List
+ *
+ * @param user the name of the current player
+ *
  */
 class SFileManager(val user : String) {
 
@@ -39,6 +43,8 @@ class SFileManager(val user : String) {
         return false
 
     }
+
+    // Check if the song has been played and guessed correctly. If no, then the song is available.
     fun isSongAvailable(num:Int):Boolean{
         val unlockedSongListFile = File(usrdir.absolutePath, "USL.xml")
         return if(unlockedSongListFile.exists()) {
@@ -50,7 +56,7 @@ class SFileManager(val user : String) {
             true
     }
 
-
+    // Authenticate if input password is correct
     fun authenticate(passwd: String): Boolean{
         val passwdFile = File(root, "passwd.txt")
         if(!passwdFile.exists())
@@ -62,36 +68,8 @@ class SFileManager(val user : String) {
         }
         return false
     }
-    fun isProfileExists(f:File):Boolean=f.readLines().any { it.contains(user) }
 
-
-    fun updateProfile(path :String){
-        val profileFile = File(root, "profile.txt")
-        if(!profileFile.exists() || !isProfileExists(profileFile))
-            profileFile.appendText("$user $path\n")
-        else{
-            val tempFile = File(root, "temp.file")
-            profileFile.forEachLine { line ->
-                if(!line.contains(user))
-                    tempFile.appendText(line)
-                else
-                    tempFile.appendText("$user $path\n")
-            }
-            profileFile.delete()
-            tempFile.renameTo(File(root, "profile.txt"))
-        }
-    }
-    fun getProfilePath():String{
-        val profileFile = File(root, "profile.txt")
-        if(profileFile.exists()) {
-            for (line in profileFile.readLines())
-                if (line.contains(user)) {
-                    val (_, path) = line.split(" ")
-                    return path
-                }
-        }
-        return ""
-    }
+    // Get user's Email address
     fun getEmail():String{
         val passwdFile = File(root, "passwd.txt")
         for(line in passwdFile.readLines()){
@@ -103,7 +81,7 @@ class SFileManager(val user : String) {
     }
 
 
-
+    // Update user's timeline record into certain file with the format of XML
     fun updateTI(timelineItem: TimelineItem){
         val time = timelineItem.time
         val result = timelineItem.result
@@ -120,7 +98,7 @@ class SFileManager(val user : String) {
         timelineFile.appendText(content)
     }
 
-
+    // Update user's Unlocked Song List into certain file with the format of XML
     fun updateUSL(song: Song){
         val number =song.Number
         val artist = song.Artist
@@ -139,7 +117,7 @@ class SFileManager(val user : String) {
         unlockedSongListFile.appendText(content)
     }
 
-
+    // remove the song in the Unlocked Song List
     fun removeFromUSL(song: Song){
         val number = song.Number
         val unlockedSongListFile = File(usrdir.absolutePath, "USL.xml")
@@ -158,7 +136,11 @@ class SFileManager(val user : String) {
         return TimelineItem(time, result, song)
     }
 
-
+    /**
+     * the method reads the timeline file in local storage and parses it to the instance of TimelineItem class.
+     *
+     * @return a list of TimelineItem
+     */
     fun getTI(): ArrayList<TimelineItem>{
         val timelineFile = File(usrdir.absolutePath, "timeline.xml")
         return if(timelineFile.exists()) {
@@ -185,6 +167,11 @@ class SFileManager(val user : String) {
     }
 
 
+    /**
+     * the method reads the Unlocked Song List file in local storage and parses it to the instance of Song.
+     *
+     * @return a list of Song's instance
+     */
     fun getUSL(): MutableList<Song>{
         val unlockedSongListFile = File(usrdir.absolutePath, "USL.xml")
         return if(unlockedSongListFile.exists()) {

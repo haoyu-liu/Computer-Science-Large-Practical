@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.haoyu.helloworldwithkotlin"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -50,10 +50,10 @@ dependencies {
     compile 'com.ogaclejapan.smarttablayout:utils-v4:1.6.1@aar'
     compile 'de.hdodenhof:circleimageview:2.2.0'
     compile 'com.github.XunMengWinter:CircularAnim:0.3.4'
+
     testCompile 'junit:junit:4.12'
 
 }
-
 
 
 

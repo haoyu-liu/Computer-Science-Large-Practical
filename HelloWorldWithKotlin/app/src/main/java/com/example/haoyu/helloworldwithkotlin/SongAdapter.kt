@@ -11,7 +11,7 @@ import co.dift.ui.SwipeToAction
 import org.jetbrains.anko.layoutInflater
 
 /**
- * Created by HAOYU on 2017/11/6.
+ *  the Adapter for RecyclerView in UnlockedSongActivity
  */
 
 

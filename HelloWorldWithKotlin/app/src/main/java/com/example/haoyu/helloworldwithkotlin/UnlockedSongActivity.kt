@@ -31,20 +31,20 @@ class UnlockedSongActivity : AppCompatActivity() {
         myToolBar.setOnClickListener{
             finish()
         }
-        //initSong()
+        // Get songs list that each song has been unlocked
         val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
         val user = pref.getString("username", "admin")
         songlist = SFileManager(user).getUSL()
 
+        // Initialize RecyclerView
         val recyclerview = find<RecyclerView>(R.id.recycler_view)
         val layoutManager = LinearLayoutManager(this)
         recyclerview.layoutManager = layoutManager
         recyclerview.setHasFixedSize(true)
-
-
         adapter = SongAdapter(songlist!!)
         recyclerview.adapter = adapter
 
+        // Set swiping actions for each item in RecyclerView
         swipeToAction = SwipeToAction(recyclerview, object: SwipeToAction.SwipeListener<Song>{
             override fun onClick(itemData: Song?) {
                 toast("click")
@@ -72,10 +72,6 @@ class UnlockedSongActivity : AppCompatActivity() {
 
 
 
-/*    override fun onCreateOptionsMenu(menu: Menu): Boolean{
-        menuInflater.inflate(R.menu.unlock_toolbar ,menu)
-        return true
-    }*/
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item!!.itemId){
@@ -90,6 +86,7 @@ class UnlockedSongActivity : AppCompatActivity() {
         return true
     }
 
+    // Remove song from the Unlocked Song List
     fun removeSong(song: Song):Int{
         val pos = songlist!!.indexOf(song)
         songlist!!.remove(song)

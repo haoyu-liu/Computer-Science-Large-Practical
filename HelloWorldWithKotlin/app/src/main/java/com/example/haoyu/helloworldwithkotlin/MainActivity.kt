@@ -39,27 +39,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         fab!!.setOnClickListener(this)
         requestPermission()
         if(SPrivilege(this).isUserLogined())
-            startActivity(Intent(this, Main2Activity::class.java))
+            startActivity<Main2Activity>()
     }
 
-
+    /**
+     * The method handles the click event of floating action button(for register activity)
+     * and login button
+     */
     override fun onClick(view: View) {
         when (view.id) {
+
             R.id.fab -> {
                 window.exitTransition = null
                 window.enterTransition = null
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    val options = ActivityOptions.makeSceneTransitionAnimation(this, fab, fab!!.transitionName)
-                    startActivity(Intent(this, RegisterActivity::class.java), options.toBundle())
-                } else {
-                    startActivity(Intent(this, RegisterActivity::class.java))
-                }
+                val options = ActivityOptions.makeSceneTransitionAnimation(this, fab, fab!!.transitionName)
+                startActivity(Intent(this, RegisterActivity::class.java), options.toBundle())
             }
             R.id.bt_go -> {
                 val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val networkInfo = connectivityManager.activeNetworkInfo
+
                 if(networkInfo==null || !networkInfo.isAvailable){
+                    // Request network connection when it is unavailable
                     alert("Please turn on Internet service and try again", "No Network Connection") {
                         yesButton {}
                         noButton {}
@@ -69,6 +70,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     val username = etUsername!!.text.toString()
                     val password = etPassword!!.text.toString()
                     val sfileManager = SFileManager(username)
+
+                    //Authenticate password
                     if (sfileManager.authenticate(password)) {
                         SPrivilege(this).updateUser(username)
                         CircularAnim.fullActivity(this, view)
@@ -83,10 +86,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
+    /**
+     * This method requests read, write and location permission
+     */
     private fun requestPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-        }
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
@@ -95,21 +98,5 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
         }
     }
-
-    private fun checkPermission() =
-            ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-
-
-    fun isExternalStorageWritable():Boolean=
-            Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
-
-    fun isExternalStrorageReadable():Boolean =
-            Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())||
-                    Environment.MEDIA_MOUNTED_READ_ONLY.equals(Environment.getExternalStorageState())
-
-
-
 
 }

@@ -42,13 +42,11 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
         etUsername = find(R.id.et_username)
         etEmail = find(R.id.et_email)
         etPassword = find(R.id.et_password)
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ShowEnterAnimation()
-        }
         fab!!.setOnClickListener(this)
         btRegGo!!.setOnClickListener(this)
+
+        ShowEnterAnimation()
+
     }
 
     override fun onClick(v: View?) {
@@ -59,6 +57,7 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
                 val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val networkInfo = connectivityManager.activeNetworkInfo
                 if(networkInfo==null || !networkInfo.isAvailable){
+                    //Ensure network connection
                     alert("Please turn on Internet service and try again", "No Network Connection") {
                         yesButton {}
                         noButton {}
@@ -70,18 +69,16 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
                     val password = etPassword!!.text.toString()
                     if(!username.contains(" ") && !email.contains(" ") && !password.contains(" ")) {
                         val sfileManager = SFileManager(username)
-
                         if (!sfileManager.isUserExists()) {
                             sfileManager.createUser(email, password)
                             SPrivilege(this).updateUser(username)
 
-                            //animation
+                            //Animation
                             CircularAnim.fullActivity(this, v)
                                     .colorOrImageRes(R.color.even_dark)
                                     .go { startActivity<Main2Activity>() }
                         } else
                           toast("username existed.")
-
                     } else
                         toast("input cannot contain space.")
 
@@ -145,7 +142,6 @@ class RegisterActivity : AppCompatActivity(), View.OnClickListener{
                 fab!!.setImageResource(R.drawable.plus)
                 super@RegisterActivity.onBackPressed()
             }
-
         })
         mAnimator.start()
     }

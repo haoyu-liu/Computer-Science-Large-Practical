@@ -31,6 +31,7 @@ import com.premnirmal.Magnet.IconCallback
 import com.premnirmal.Magnet.Magnet
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.longSnackbar
+import org.jetbrains.anko.design.snackbar
 import java.io.File
 import java.text.DateFormat
 import java.util.*
@@ -51,22 +52,23 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     private var recyclerview:RecyclerView? =null
     private var songParser: SongParser? =null
     private var lyricHashMap : HashMap<String, String>?=null
-    private var magnet:Magnet?=null
+    private var bubble:Magnet?=null
     private var song:Song?=null
     private var user :String?=null
     private var usrdirpath: String?=null
     private var sfileManager :SFileManager?=null
     private var countdownTimer:ChallengeTimer?=null
     private var degree:String?=null
+    private var mode:String?=null
     private var state = 0
     private var secondsLeft=0L
     private val markersHashMap = hashMapOf<Marker, marker>()
     private val markersObj = mutableListOf<Marker>()
-    private val obtained_interestingword = mutableListOf<Word>()
-    private val obtained_veryinterestingword = mutableListOf<Word>()
-    private val obtained_boringword = mutableListOf<Word>()
-    private val obtained_notboringword = mutableListOf<Word>()
-    private val obtained_unclassifiedword = mutableListOf<Word>()
+    private val obtainedInterestingWord = mutableListOf<Word>()
+    private val obtainedVeryInterestingWord = mutableListOf<Word>()
+    private val obtainedBoringWord = mutableListOf<Word>()
+    private val obtainedNotBoringWord = mutableListOf<Word>()
+    private val obtainedUnclassifiedWord = mutableListOf<Word>()
 
 
 
@@ -84,10 +86,10 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
                 .addApi(LocationServices.API)
                 .build()
 
-        //profile bubble
+        // initialize profile bubble
         val iconview = ImageView(this)
         iconview.setImageResource(R.mipmap.koyomi_circle)
-        magnet = Magnet.newBuilder(this).setIconView(iconview)
+        bubble = Magnet.newBuilder(this).setIconView(iconview)
                 .setIconWidth(220)
                 .setIconHeight(220)
                 .setIconCallback(this)
@@ -99,7 +101,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
                 .setInitialPosition(300,400)
                 .build()
 
-        //views on bottom sheet
+        // obtain instances of views on bottom sheet
         val bottomSheet = findViewById(R.id.bottom_sheet)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         countdowntTextView = find(R.id.countdown_text)
@@ -108,41 +110,43 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         val btn = find<Button>(R.id.confirm_button)
         btn.setOnClickListener(this)
 
-        //values from previous activity
+        // obtain values(mode and degree) from previous activity
         val intent = intent
-        val mode = intent.getStringExtra("mode")
+        mode = intent.getStringExtra("mode")
         degree = intent.getStringExtra("degree")
 
-        //init SFileManager
+        // initialize SFileManager
         val pref = getSharedPreferences("user", Context.MODE_PRIVATE)
         user = pref.getString("username", "admin")
         usrdirpath = File(Environment.getExternalStorageDirectory().absolutePath, user).absolutePath
         sfileManager = SFileManager(user!!)
 
-        //init SongParser
+        // initialize SongParser
         val songNum =pref.getInt("songNum", 1)
         val randNum = (1..songNum).random()
         songParser = if(degree == "Hard")
             SongParser(randNum, 4)
         else
             SongParser(randNum, 5)
-
         song = songParser!!.song
         Log.d("tvSongName>>>>>>>", "${song!!.Title}")
         lyricHashMap = songParser!!.lyricsmap
 
-
-        var count = 0
+        // Set ClickListener for CountDown TextView. This TextView is clickable once
         countdowntTextView!!.setOnClickListener {
-            if(count==0) {
-                count++
+            if(state==0) {
                 state = 1
+                // Select markers that will be added on the map
                 val markersInMapList = markerGenerator(songParser!!.loadMarkerList(), degree!!)
+
+                // Add selected markers to the map
                 markersInMapList.forEach { v ->
                     val markerObj = mMap!!.addMarker(MarkerOptions()
                             .position(LatLng(v.latitude.toDouble(), v.longitude.toDouble())))
                     markersObj.add(markerObj)
                     markersHashMap.put(markerObj, v)
+
+                    // Set icon for different styles of markers
                     when (v.style) {
                         "boring" ->
                             markersObj[markersObj.size - 1].setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.boring))
@@ -157,7 +161,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
                     }
                 }
                 mMap!!.setOnMarkerClickListener(this)
-                magnet!!.show()
+                bubble!!.show()
 
                 //init Expandable RecyclerView
                 val adapter = TypeAdapter(constructData())
@@ -167,97 +171,65 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
 
 
                 if(mode=="Challenge")
-                    startTimer(60000*3, 1000)
+                    startTimer(60000*6, 1000)
                 if(mode=="Casual")
                     countdowntTextView!!.text = "drag up to review gained markers"
             }
         }
     }
 
-
-    private fun markerGenerator(allmarkerList : MutableList<marker>, degree: String):MutableList<marker>{
-
-        val markersInMapList = mutableListOf<marker>()
-
-        when (degree) {
-            "Easy" -> {
-                allmarkerList.forEach { v ->
-                    if(Random().nextDouble()>0.75)
-                        markersInMapList.add(v)
-                }
-                return markersInMapList
-            }
-            "Moderate" -> {
-
-                allmarkerList.forEach { v->
-                    if(Random().nextDouble()>0.8)
-                        markersInMapList.add(v)
-                }
-                return markersInMapList
-            }
-            else -> {
-                allmarkerList.forEach { v->
-                    if(Random().nextDouble()>0.85)
-                        markersInMapList.add(v)
-                }
-                return markersInMapList
-            }
-        }
-    }
-
-    private fun startTimer(duration: Long, interval: Long){
-        countdownTimer = ChallengeTimer(duration, interval)
-        countdownTimer!!.start()
-    }
-
-    private fun addBonusMarker(){
-        val latitude = Random().nextDouble()*(55.946233-55.942617)+55.942617
-        val longitude = Random().nextDouble()*(-3.184319+3.192473)-3.192473
-        d("bonus marker","$latitude, $longitude")
-        mMap!!.addMarker(MarkerOptions()
-                .position(LatLng(latitude, longitude))
-                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.bonus)))
-        longSnackbar(recyclerview!!, "Bonus marker appears")
-        mMap!!.setOnMarkerClickListener(this)
-    }
-
     override fun onClick(v: View?) {
         d("btnid", "${v!!.id} ${R.id.confirm_button}")
-        when(v!!.id){
+        when(v.id){
             R.id.confirm_button ->{
+                // handle the click event of confirm button
                 val editText = find<EditText>(R.id.answer_edittext)
-                if(editText.text.toString() == song!!.Title){
+                if(editText.text.toString().toLowerCase() == song!!.Title.toLowerCase()){
                     onSuccess()
-                }
+                }else
+                    snackbar(editText, "Incorrect. Try again")
             }
         }
     }
 
-
-
     override fun onMarkerClick(p0: Marker?): Boolean {
-
+        // Calculate the distance from current location to marker's location
         val markerLocation = Location("marker")
         markerLocation.latitude = p0!!.position.latitude
         markerLocation.longitude = p0.position.longitude
         val distance = markerLocation.distanceTo(mLastLocation)
+
         if(distance<15 && p0 in markersHashMap){
+            // handle non-bonus marker
+            // Obtain the word corresponding to the marker
             val word = lyricHashMap!![markersHashMap[p0]!!.name]
             val style = markersHashMap[p0]!!.style
             Log.d("collect marker", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>$word")
+
+            // Classify the word to Expandable RecyclerView
             when(style){
-                "boring" -> obtained_boringword.add(Word(word!!))
-                "notboring" -> obtained_notboringword.add(Word(word!!))
-                "interesting"-> obtained_interestingword.add(Word(word!!))
-                "veryinteresting" -> obtained_veryinterestingword.add(Word(word!!))
-                else -> obtained_unclassifiedword.add(Word(word!!))
+                "boring" -> obtainedBoringWord.add(Word(word!!))
+                "notboring" -> obtainedNotBoringWord.add(Word(word!!))
+                "interesting"-> obtainedInterestingWord.add(Word(word!!))
+                "veryinteresting" -> obtainedVeryInterestingWord.add(Word(word!!))
+                else -> obtainedUnclassifiedWord.add(Word(word!!))
             }
             val adapter = TypeAdapter(constructData())
             recyclerview!!.adapter=adapter
             toast("obtained word: $word")
+
+            // Remove collected the marker
             p0.remove()
         }
         else if(distance<15 && p0 !in markersHashMap){
+            /**
+             * handle bonus marker
+             * Cancel original CountDown Timer. Calculate bonus time and start a new timer.
+             *
+             * for Easy degree, bonus time is in the range of 30~60 seconds
+             * for Moderate degree, bonus time is in the range of 20~60 seconds
+             * for Hard degree, bonus time is in the range of 10~60 seconds
+             */
             countdownTimer!!.cancel()
             val i = when(degree){
                 "Easy" -> Random().nextInt(30)+30
@@ -266,6 +238,8 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             }
             d("time added", "$i")
             startTimer((secondsLeft+i)*1000, 1000)
+
+            // Remove collected bonus marker
             p0.remove()
         }
         else
@@ -273,47 +247,9 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         return true
     }
 
-    private fun onFail(){
 
-        alert("This challenge failed. Try again!", "Challenge Failed") {
-            yesButton {
-                val time = DateFormat.getDateTimeInstance().format(Date())
-                val result = "0"
-                val song = song!!.Title
-                sfileManager!!.updateTI(TimelineItem(time, result, song))
-                magnet!!.destroy()
-            }
-            noButton {
-                if (secondsLeft <= 1L) {
-                    val time = DateFormat.getDateTimeInstance().format(Date())
-                    val result = "0"
-                    val song = song!!.Title
-                    sfileManager!!.updateTI(TimelineItem(time, result, song))
-                    magnet!!.destroy()
-                }
-            }
-        }.show().setCancelable(false)
-
-
-    }
-
-    private fun onSuccess(){
-        val time = DateFormat.getDateTimeInstance().format(Date())
-        val result = "1"
-        val name = this.song!!.Title
-        sfileManager!!.updateTI(TimelineItem(time, result, name))
-        sfileManager!!.updateUSL(this.song!!)
-        alert("This challenge succeeded. Congrats", "Challenge Successful") {
-            yesButton {magnet!!.destroy()}
-            noButton {magnet!!.destroy()}
-        }.show().setCancelable(false)
-
-
-    }
-
-
-
-    //magnet override functions
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // Bubble's override functions start
     override fun onFlingAway() {
         onFail()
     }
@@ -329,13 +265,9 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     override fun onIconClick(p0: View?, p1: Float, p2: Float) {
 
     }
+    // Bubble's override functions end
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    override fun onBackPressed() {
-        if(state == 1)
-            onFail()
-        super.onBackPressed()
-
-    }
 
     override fun onStart() {
         mGoogleApiClient!!.connect()
@@ -347,6 +279,15 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         super.onStop()
     }
 
+    override fun onBackPressed() {
+        if(state == 1)
+        // the game has started
+            onFail()
+        else
+        // the game has not started yet
+            super.onBackPressed()
+
+    }
 
     //mMap
     override fun onMapReady(googleMap: GoogleMap) {
@@ -364,24 +305,9 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
     }
 
 
-    private fun enableMyLocation()=
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                !=PackageManager.PERMISSION_GRANTED){
-           ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-        }
-        else mMap!!.isMyLocationEnabled = true
 
-    private fun createLocationRequest(){
-        val mLocationRequest = LocationRequest()
-        mLocationRequest.interval = 3000
-        mLocationRequest.fastestInterval = 1000
-        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        if(permissionCheck == PackageManager.PERMISSION_GRANTED)
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this)
-    }
-
-    //connection-related override functions
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // Connection-related override functions start
     override fun onConnected(p0: Bundle?) {
         try{ createLocationRequest()}
         catch (ise: IllegalStateException){
@@ -396,6 +322,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         if(p0 == null){
             Log.d("mapactivity", "[onLocationChanged] Location unknown")
         }else{
+            // Update my LastLocation
             mLastLocation=p0
         }
     }
@@ -408,8 +335,139 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         Log.d("mapactivity", ">>>onConnectedFailed")
 
     }
+    // Connection-related override functions end
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    fun ClosedRange<Int>.random():Int {
+
+    /**
+     * The method randomly picks markers in certain kml file. The number of markers picked is
+     * according to the degree of difficulty in this game. Generally,
+     * in Easy degree, 50% of markers will be picked
+     * in Moderate degree, 30% of markers will be picked
+     * in Hard degree, 20% of markers will be picked
+     *
+     * @param allmarkerList a list of all the markers in a certain kml file
+     * @param degree the degree of difficulty in this game
+     *
+     * @return a list of markers which will be used in this game
+     */
+    private fun markerGenerator(allmarkerList : MutableList<marker>, degree: String):MutableList<marker>{
+
+        val markersInMapList = mutableListOf<marker>()
+
+        when (degree) {
+            "Easy" -> {
+                allmarkerList.forEach { v ->
+                    if(Random().nextDouble()>0.50)
+                        markersInMapList.add(v)
+                }
+                return markersInMapList
+            }
+            "Moderate" -> {
+
+                allmarkerList.forEach { v->
+                    if(Random().nextDouble()>0.7)
+                        markersInMapList.add(v)
+                }
+                return markersInMapList
+            }
+            else -> {
+                allmarkerList.forEach { v->
+                    if(Random().nextDouble()>0.8)
+                        markersInMapList.add(v)
+                }
+                return markersInMapList
+            }
+        }
+    }
+
+    /**
+     * This method randomly generates a bonus marker within the regulated range,
+     * and mark notification for the player after the marker added to the map.
+     */
+    private fun addBonusMarker(){
+        val latitude = Random().nextDouble()*(55.946233-55.942617)+55.942617
+        val longitude = Random().nextDouble()*(-3.184319+3.192473)-3.192473
+        d("bonus marker","$latitude, $longitude")
+        mMap!!.addMarker(MarkerOptions()
+                .position(LatLng(latitude, longitude))
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.bonus)))
+        longSnackbar(recyclerview!!, "Bonus marker appears")
+        mMap!!.setOnMarkerClickListener(this)
+    }
+
+    // Start the timers shows on the Bottom Sheet
+    private fun startTimer(duration: Long, interval: Long){
+        countdownTimer = ChallengeTimer(duration, interval)
+        countdownTimer!!.start()
+    }
+
+    // This method will be called when the game is failed or the player intends to exit the game.
+    private fun onFail(){
+
+        alert("This challenge failed. Try again!", "Challenge Failed") {
+            yesButton {
+                // Add the failed record to fail and exit the game.
+                val time = DateFormat.getDateTimeInstance().format(Date())
+                val result = "0"
+                val song = song!!.Title
+                sfileManager!!.updateTI(TimelineItem(time, result, song))
+                bubble!!.destroy()
+            }
+            noButton {
+                if (secondsLeft <= 1L) {
+                    // Add the failed record to fail and exit the game.
+                    val time = DateFormat.getDateTimeInstance().format(Date())
+                    val result = "0"
+                    val song = song!!.Title
+                    sfileManager!!.updateTI(TimelineItem(time, result, song))
+                    bubble!!.destroy()
+                }
+            }
+        }.show().setCancelable(false)
+
+
+    }
+
+    // This method will be called when the game is passed
+    private fun onSuccess(){
+        // Add record to the file
+        val time = DateFormat.getDateTimeInstance().format(Date())
+        val result = "1"
+        val name = this.song!!.Title
+        sfileManager!!.updateTI(TimelineItem(time, result, name))
+        if(mode=="Challenge")
+            sfileManager!!.updateUSL(this.song!!)
+
+        // Exit the game
+        alert("The challenge succeeded. Congratulations", "Challenge Succeeded") {
+            yesButton { bubble!!.destroy()}
+            noButton { bubble!!.destroy()}
+        }.show().setCancelable(false)
+
+
+    }
+
+
+    private fun enableMyLocation()=
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    !=PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
+            }
+            else mMap!!.isMyLocationEnabled = true
+
+    private fun createLocationRequest(){
+        val mLocationRequest = LocationRequest()
+        mLocationRequest.interval = 3000
+        mLocationRequest.fastestInterval = 1000
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        if(permissionCheck == PackageManager.PERMISSION_GRANTED)
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this)
+    }
+
+    // Randomly generate a index of song which is never guessed correctly before.
+    private fun ClosedRange<Int>.random():Int {
         val manager = SFileManager(user!!)
         while(true) {
             val num = Random().nextInt(endInclusive - start) + start
@@ -419,12 +477,15 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
 
     }
 
+    // Construct data for Expandable RecyclerView
     private fun constructData(): List<Type> =
-            Arrays.asList(Type("boring", obtained_boringword), Type("notboring", obtained_notboringword),
-                    Type("interesting", obtained_interestingword), Type("veryinteresting", obtained_veryinterestingword),
-                    Type("unclassified", obtained_unclassifiedword))
+            Arrays.asList(Type("boring", obtainedBoringWord), Type("notboring", obtainedNotBoringWord),
+                    Type("interesting", obtainedInterestingWord), Type("veryinteresting", obtainedVeryInterestingWord),
+                    Type("unclassified", obtainedUnclassifiedWord))
 
-
+    /**
+     * The inner class monitors any network changes and notifies the player if network is unavailable
+     */
     private inner class NetworkChangeReceiver: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             val connectivityManager = context!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -435,6 +496,9 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         }
     }
 
+    /**
+     * The inner class starts a new countdown timer and changes the countdown textview synchronously.
+     */
     private inner class ChallengeTimer(duration: Long, interval: Long) : CountDownTimer(duration, interval) {
         override fun onFinish() {
             onBackPressed()

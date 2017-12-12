@@ -4,14 +4,16 @@ import android.os.Environment
 import org.jsoup.Jsoup
 import java.io.File
 
-/**
- * Created by HAOYU on 2017/11/1.
- */
+
 
 data class Song(val Number: String, val Artist: String, val Title: String, val Link: String)
 data class marker(val name: String, val longitude: String, val latitude: String, val style: String)
 
-
+/**
+ * The class parsing KML file and XML file for MapActivity
+ * @param index the index of the song whose map KML file will be loaded
+ * @param version decide which version of the map will be loaded
+ */
 class SongParser(val index: Int, val version: Int){
 
 
@@ -37,8 +39,14 @@ class SongParser(val index: Int, val version: Int){
         song = songlist[index -1]
     }
 
+    /**
+     * This method reads and parses certain KML file into the instances of marker
+     * and creates the lyrics map between single words and their position in words.txt
+     *
+     * @return a list of marker instances.
+     */
     fun loadMarkerList() : MutableList<marker>{
-        //kml
+        // KML parsing
         val dockml = Jsoup.parse(songkml,"UTF-8")
         val styles = dockml.getElementsByTag("Style")
         styles.forEach { style ->
@@ -52,7 +60,7 @@ class SongParser(val index: Int, val version: Int){
             val (longitude, latitude, _) = coordinates[i].html().split(",")
             markerList.add(marker(names[i].html(), longitude, latitude, descriptions[i].html()))
         }
-        //txt
+        // Create lyrics map
         val lyrics= mutableListOf<String>()
         songtxt.useLines { lines -> lines.forEach { lyrics.add(it.trim()) }}
         for (i in lyrics.indices){
@@ -65,6 +73,12 @@ class SongParser(val index: Int, val version: Int){
 
     }
 
+
+    /**
+     * the method parses songs.xml on the server into the instances of Song
+     *
+     * @return songlist a list of Song instances
+     */
     fun loadSongList() : MutableList<Song>{
         val xml = Jsoup.connect("http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/songs.xml").get()
         val songs = xml.select("Song")

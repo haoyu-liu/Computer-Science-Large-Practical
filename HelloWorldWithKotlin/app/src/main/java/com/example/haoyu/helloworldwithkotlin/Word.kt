@@ -1,7 +1,7 @@
 package com.example.haoyu.helloworldwithkotlin
 
 /**
- * Created by HAOYU on 2017/11/8.
+ * The class for each word showing in Expandable RecyclerView when it expanded
  */
 
 import android.os.Parcel
