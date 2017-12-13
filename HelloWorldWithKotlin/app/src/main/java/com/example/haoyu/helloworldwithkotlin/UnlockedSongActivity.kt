@@ -40,36 +40,13 @@ class UnlockedSongActivity : AppCompatActivity() {
         val recyclerview = find<RecyclerView>(R.id.recycler_view)
         val layoutManager = LinearLayoutManager(this)
         recyclerview.layoutManager = layoutManager
-        recyclerview.setHasFixedSize(true)
-        adapter = SongAdapter(songlist!!)
+        //recyclerview.setHasFixedSize(true)
+        adapter = SongAdapter(songlist!!, this)
         recyclerview.adapter = adapter
 
-        // Set swiping actions for each item in RecyclerView
-        swipeToAction = SwipeToAction(recyclerview, object: SwipeToAction.SwipeListener<Song>{
-            override fun onClick(itemData: Song?) {
-                toast("click")
-                Log.d("left", itemData.toString())
-            }
 
-            override fun onLongClick(itemData: Song?) {
-                toast("longclick")
-            }
 
-            override fun swipeRight(itemData: Song?): Boolean {
-                SFileManager(user).removeFromUSL(itemData!!)
-                removeSong(itemData)
-                snackbar(find<RecyclerView>(R.id.recycler_view), "removed")
-                return true
-            }
-
-            override fun swipeLeft(itemData: Song?): Boolean {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(itemData!!.Link)))
-                toast("swiperight")
-                return true
-            }
-        })
     }
-
 
 
 
@@ -86,12 +63,5 @@ class UnlockedSongActivity : AppCompatActivity() {
         return true
     }
 
-    // Remove song from the Unlocked Song List
-    fun removeSong(song: Song):Int{
-        val pos = songlist!!.indexOf(song)
-        songlist!!.remove(song)
-        adapter!!.notifyItemRemoved(pos)
-        return pos
-    }
 
 }

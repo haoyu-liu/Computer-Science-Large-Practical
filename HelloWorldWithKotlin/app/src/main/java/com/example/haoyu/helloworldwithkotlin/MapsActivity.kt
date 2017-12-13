@@ -199,8 +199,8 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
         markerLocation.longitude = p0.position.longitude
         val distance = markerLocation.distanceTo(mLastLocation)
 
-        if(distance<15 && p0 in markersHashMap){
-            // handle non-bonus marker
+        if(distance<100 && p0 in markersHashMap){
+            // Handle non-bonus marker
             // Obtain the word corresponding to the marker
             val word = lyricHashMap!![markersHashMap[p0]!!.name]
             val style = markersHashMap[p0]!!.style
@@ -221,14 +221,14 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             // Remove collected the marker
             p0.remove()
         }
-        else if(distance<15 && p0 !in markersHashMap){
+        else if(distance<100 && p0 !in markersHashMap){
             /**
-             * handle bonus marker
+             * Handle bonus marker
              * Cancel original CountDown Timer. Calculate bonus time and start a new timer.
              *
-             * for Easy degree, bonus time is in the range of 30~60 seconds
-             * for Moderate degree, bonus time is in the range of 20~60 seconds
-             * for Hard degree, bonus time is in the range of 10~60 seconds
+             * For Easy degree, bonus time is in the range of 30~60 seconds
+             * For Moderate degree, bonus time is in the range of 20~60 seconds
+             * For Hard degree, bonus time is in the range of 10~60 seconds
              */
             countdownTimer!!.cancel()
             val i = when(degree){
@@ -501,6 +501,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
      */
     private inner class ChallengeTimer(duration: Long, interval: Long) : CountDownTimer(duration, interval) {
         override fun onFinish() {
+            countdowntTextView!!.text ="Time's up"
             onBackPressed()
         }
 
@@ -510,7 +511,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback,
             secondsLeft -= minutesLeft * 60
             countdowntTextView!!.text = "$minutesLeft : $secondsLeft"
             secondsLeft += minutesLeft * 60
-            if (secondsLeft % 30 == 0L && Random().nextDouble() < 0.25)
+            if (secondsLeft % 30 == 0L && Random().nextDouble() < 0.25 && secondsLeft > 31)
                 addBonusMarker()
         }
     }

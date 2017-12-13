@@ -13,8 +13,8 @@
             android:title="Unloked Songs" />
         <item
             android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Settings" />
+            android:icon="@drawable/ic_menu_send"
+            android:title="Start game" />
     </group>
 
     <item android:title="More">
@@ -25,7 +25,7 @@
                 android:title="Share" />
             <item
                 android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
+                android:icon="@drawable/ic_menu_logout"
                 android:title="Log out" />
         </menu>
     </item>

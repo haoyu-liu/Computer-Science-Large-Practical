@@ -179,6 +179,12 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             // Launch UnlockedSongActivity
             startActivity<UnlockedSongActivity>()
         }
+        else if (id == R.id.nav_manage){
+            when(mPager!!.currentItem) {
+                2 -> mPager!!.currentItem = 0
+                else -> mPager!!.currentItem = 2
+            }
+        }
         else if (id == R.id.nav_send) {
             // Log out and launch MainActivity
             SPrivilege(this).updateUser("null")

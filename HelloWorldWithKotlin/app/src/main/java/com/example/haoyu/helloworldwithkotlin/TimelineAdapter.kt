@@ -24,7 +24,7 @@ class TimelineAdapter(private val timelineItemList: List<TimelineItem>) : Recycl
         val tvSuccessTime=view.find<TextView>(R.id.textview_success_time)
         val ivResultIcon=view.find<ImageView>(R.id.result_image)
 
-        // Widgets of a fail timeline item, showing at the left side of timeline
+        // Widgets of a failure timeline item, showing at the left side of timeline
         val tvFailTime=view.find<TextView>(R.id.textview_fail_time)
         val tvSongNameFail=view.find<TextView>(R.id.textview_songname_fail)
         val tvFail=view.find<TextView>(R.id.textview_fail)
